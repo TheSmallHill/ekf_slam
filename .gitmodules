@@ -1,3 +1,6 @@
 [submodule "lib/BlackLib"]
 	path = lib/BlackLib
 	url = https://github.com/TheSmallHill/BlackLib
+[submodule "lib/libxbee3"]
+	path = lib/libxbee3
+	url = https://github.com/TheSmallHill/libxbee3
