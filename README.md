@@ -1,7 +1,14 @@
 # ekf_slam
-Repository for senior project
+A ROS package written to implement an Extended Kalman Filter - Simultaneous Localization and Mapping system (EKF-SLAM) on a Pioneer 3-DX.
 
 ## About
+
+
+### Parts
+- Beaglebone Black rev C
+- Big Easy Driver
+- 200 steps/rev stepper motor
+- XBee s2c 
 
 ## Setup
 
