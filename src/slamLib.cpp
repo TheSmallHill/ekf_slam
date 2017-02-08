@@ -1,5 +1,9 @@
 #include "slamLib.h"
 
+BlackLib::BlackGPIO step;
+BlackLib::BlackGPIO direc;
+BlackLib::BlackGPIO enable;
+
 //when putting this onto beaglebone, rewrite these next 2 lines (don't include them and instead do it like BlackLib::BlackGPIO or whatever for each function, should avoid issues that way)
 using namespace std;
 //using namespace BlackLib;
@@ -25,10 +29,10 @@ BlackLib::BlackGPIO direction(BlackLib::GPIO_60,BlackLib::output,BlackLib::FastM
 //	BlackGPIO enable(GPIO_67,output,fastmode);
 //	BlackGPIO direc(GPIO_35,output,fastmode);
 
-BlackLib::BlackGPIO step(BlackLib::GPIO_30,BlackLib::output,BlackLib::FastMode);
-BlackLib::BlackGPIO enable(BlackLib::GPIO_60,BlackLib::output,BlackLib::SecureMode);
-BlackLib::BlackGPIO direc(BlackLib::GPIO_31,BlackLib::output,BlackLib::FastMode);
-
+step(BlackLib::GPIO_30,BlackLib::output,BlackLib::FastMode);
+direc(BlackLib::GPIO_31,BlackLib::output,BlackLib::FastMode);
+enable(BlackLib::GPIO_60,BlackLib::output,BlackLib::SecureMode);
+	
 	enable.setValue(BlackLib::high);
 	
 	step.setValue(BlackLib::low);
@@ -55,9 +59,9 @@ int initializeXbee(){
 
 int incrementMotor(int steps, int dir, float &angle) {
 		
-	BlackLib::BlackGPIO step(BlackLib::GPIO_30,BlackLib::output,BlackLib::FastMode);
-	BlackLib::BlackGPIO enable(BlackLib::GPIO_60,BlackLib::output,BlackLib::SecureMode);
-	BlackLib::BlackGPIO direc(BlackLib::GPIO_31,BlackLib::output,BlackLib::FastMode);
+//	BlackLib::BlackGPIO step(BlackLib::GPIO_30,BlackLib::output,BlackLib::FastMode);
+//	BlackLib::BlackGPIO enable(BlackLib::GPIO_60,BlackLib::output,BlackLib::SecureMode);
+//	BlackLib::BlackGPIO direc(BlackLib::GPIO_31,BlackLib::output,BlackLib::FastMode);
 
 	struct timespec tim, tim2;
 	tim.tv_sec = 0;
