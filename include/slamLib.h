@@ -1,4 +1,4 @@
-//get rid of duplicates in this list
+// add #idndef statements where necessary
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -6,65 +6,47 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-//#include <string.h>
 #include <ctype.h>
-//#include <semaphore.h>
 #include <errno.h>
 #include <time.h>
-//#include <xbee.h> //check this
-//#include "slamLib.h"
-//#include "xbeeLib.h"
-
-//#include <stdio.h>
-//#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <semaphore.h>
-//#include <errno.h>
-//#include <time.h>
-//#include <unistd.h>
-
 #include <xbeep.h>
 
 #include "../lib/BlackLib/v3_0/BlackLib.h" 
 
+// Create semaphore so it global
 sem_t ndComplete;
 
+// Functions for getting measurements from XBees
 int nodeDetect(void); //check this
-void nodeCB(struct xbee *xbee, struct xbee_con *con, struct xbee_pkt **pkt, void **data); //needs modification so it saves results instead of printing
+void nodeCB(struct xbee *xbee, struct xbee_con *con, struct xbee_pkt **pkt, void **data); // find a way to save data to a matrix or other data structure
 
+// Initializations
+int initializeUART(void); // Unfinished
+int initializeGPIO(void); // Cleanup
+int initializeXbee(void); // Unfinished, possibly unnecessary if combined with initializeGPIO()
 
+// Motor control functions
+int incrementMotor(int steps, int dir, float &angle); // Cleanup
+int rotate2Angle(float &angle, float desAngle); // Cleanup
 
-//sem_t ndComplete; //for using semaphores, check where this should be put
+// Measuring distance functions
+float calibrate(float eta); // Unfinished
+int discoverNodes(float &angle, double* DAtable, double** results, int &results_r, int &results_c); // Unfinished
 
-//initializations
-int initializeUART(void); //probably can get rid of this, but try to find a way to implement
-int initializeGPIO(void); //check this
-
-//motor control functions
-int incrementMotor(int steps, int dir, float &angle);//check
-int rotate2Angle(float &angle, float desAngle); //check
-
-//measuring distance functions
-float calibrate(float eta); //need to finish
-int discoverNodes(float &angle, double* DAtable, double** results, int &results_r, int &results_c); //need to finish
-
-void dataAssociate(double* DAtable, double** results, int &results_r, int &results_c, double** temp, float &angle); //need to finish
+// Data association
+void dataAssociate(double* DAtable, double** results, int &results_r, int &results_c, double** temp, float &angle); // Unfinished
 
 //data processing functions
-void RSSI2dist(double** results, float eta, float pRef);//need to finish
-void findBearing(double** results, double* DAtable, double* bearings);//need to finish
-void findRange(double** results, double* DAtable, double* ranges);//need to finish
-void printResults(double* ranges, double* bearings, double* DAtable);//need to finish
-void saveData(double* ranges, double* bearings, double* DAtable);//need to finish
+void RSSI2dist(double** results, float eta, float pRef); // Unfinished
+void findBearing(double** results, double* DAtable, double* bearings); // Unfinished
+void findRange(double** results, double* DAtable, double* ranges); // Unfinished
+void printResults(double* ranges, double* bearings, double* DAtable); // Unfinished
+void saveData(double* ranges, double* bearings, double* DAtable); // Unfinished
 
 //shutdown functions
-int shutdownUART(void);//implement
-int shutdownGPIO(void);//implement
-
-//a convenient length function
-/*template <signed T, unsigned N, unsigned N1>
-int length(T (&)[N][N1])
-{
-    return N;
-}*/
+int shutdownUART(void); // Unfinished
+int shutdownGPIO(void); // Unfinished
+int shutdownXbee(void); // Unfinished
