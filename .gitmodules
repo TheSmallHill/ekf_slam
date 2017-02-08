@@ -1,0 +1,3 @@
+[submodule "lib/BlackLib"]
+	path = lib/BlackLib
+	url = https://github.com/TheSmallHill/BlackLib
