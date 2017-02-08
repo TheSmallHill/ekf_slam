@@ -49,6 +49,10 @@ BlackLib::BlackGPIO direc(BlackLib::GPIO_31,BlackLib::output,BlackLib::FastMode)
 
 }
 
+int initializeXbee(){
+// to be written
+}
+
 int incrementMotor(int steps, int dir, float &angle) {
 		
 	BlackLib::BlackGPIO step(BlackLib::GPIO_30,BlackLib::output,BlackLib::FastMode);
@@ -332,6 +336,18 @@ void saveData(double* ranges, double* bearings, double* DAtable){
 
 //very similar to the print results function except the results are saved to a file instead of printed to the screen
 
+}
+
+int shutdownUART(){
+//to be written
+}
+
+int shutdownGPIO(){
+//to be written
+}
+
+int shutdownXbee(){
+//to be written
 }
 
 void nodeCB(struct xbee *xbee, struct xbee_con *con, struct xbee_pkt **pkt, void **data) {
