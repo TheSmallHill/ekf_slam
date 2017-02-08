@@ -16,8 +16,13 @@
 
 #include "../lib/BlackLib/v3_0/BlackLib.h" 
 
-// Create semaphore so it global
+// globals
 sem_t ndComplete;
+
+// externals
+extern BlackLib::BlackGPIO step;
+extern BlackLib::BlackGPIO enable;
+extern BlackLib::BlackGPIO direc;
 
 // Functions for getting measurements from XBees
 int nodeDetect(void); //check this
