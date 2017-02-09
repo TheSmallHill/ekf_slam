@@ -4,43 +4,15 @@ using namespace std;
 
 int main(void){
 
-// do some stuff here
-initializeGPIO();
-
-//int steps = 1653;
-//int dir = 1;
-float angle = 0;
-
-struct timespec tim, tim1;
-tim.tv_sec = 0;
-tim.tv_nsec = 500000000L;
-
-int rtn;
-
-for (int i = 0; i < 20; i++) {
-	rtn = incrementMotor(80, 1, angle);
-	cout << "step: " << i << " angle: " << angle << endl;
-	rtn = nodeDetect();
-	cout << "done detecting" << endl;
-//	nanosleep(&tim, &tim1);
-}	
-
-/*for (int j = 0; j < 5; j++){
-for (int i = 0; i<20; i++){
-	rtn = incrementMotor(80, 0, angle);
-	cout << "step: " << i << " angle: " << angle << endl;
-	nanosleep(&tim, &tim1);
-}
-
-for (int i = 0; i <20;i++){
-	rtn = incrementMotor(80,1,angle);
-	cout << "step: " << i << " angle: " << angle << endl;
-	nanosleep(&tim, &tim1);
-
-}
-}*/
-
-//rtn = rotate2Angle(angle, 0);
-
-return rtn;
+//create gpio pins from blacklib	
+BlackLib::BlackGPIO step = BlackGPIO(BlackLib::GPIO_30, BlackLib::output, BlackLib::FastMode);
+BlackLib::BlackGPIO direc = BlackGPIO(BlackLib::GPIO_60, BlackLib::output, BlackLib::FastMode);
+	
+motor *M1 = new motor(&step, &direc);
+	
+//initializations
+M1->pos=0;
+	
+return(0);
+	
 }
