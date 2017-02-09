@@ -25,7 +25,7 @@ class motor{
     int setDirection(int);
     int setMicrostep(int*);
     void incrementMotor(int);
-    void rotateToPos(float);
+    void rotateToAng(float);
     void test();
     
     BlackGPIO& stepPin;
