@@ -43,7 +43,7 @@ int motor::setDirection(int dir)
     
   }
   
-  if ((directionPin.isHigh && dir == 1) || (!directionPin.isHigh && dir == 0)) {
+  if ((directionPin.isHigh() && dir == 1) || (!directionPin.isHigh() && dir == 0)) {
   
     return(1);
     
@@ -54,7 +54,7 @@ int motor::setDirection(int dir)
 int motor::getDirection()
 {
 
-  return directionPin.getValue;
+  return directionPin.getValue();
 
 }
 
@@ -73,7 +73,7 @@ int motor::setMicrostep(int* ms[3])
   msDivider = 16; //sixteenth step
  }
 
-  if (ms1Pin.getValue == ms[0] && ms2Pin.getValue == ms[1] && ms3Pin.getValue == ms[2]) {
+  if (ms1Pin.getValue() == ms[0] && ms2Pin.getValue() == ms[1] && ms3Pin.getValue() == ms[2]) {
    return(1); 
   } else return(0);
   
@@ -95,11 +95,11 @@ void motor::incrementMotor(int steps)
     nanosleep(&tim, &tim1);
     
     //change position counter
-    if (directionPin.isHigh) {
+    if (directionPin.isHigh()) {
     
       pos--;
     
-    } else if (!directionPin.isHigh) {
+    } else if (!directionPin.isHigh()) {
     
       pos++;
     
