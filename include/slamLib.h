@@ -16,6 +16,10 @@
 
 #include "../lib/BlackLib/v3_0/BlackLib.h" 
 
+// preprocessor definitions
+#define CW 0
+#define CCW 1
+
 // globals
 sem_t ndComplete;
 
