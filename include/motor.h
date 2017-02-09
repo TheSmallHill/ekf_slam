@@ -13,14 +13,17 @@ class motor{
     float position;
     float positionMax;
     float positionMin;
+    float stepSize;
+    int numSteps;
     int direction;
     float speed;
     float speedMax;
-    int microStepping[3];
-     
-    void setPos(float, float);
-    float getPot();
+    int ms[3] = {0, 0, 0};
+      
+    int getPos();
+    float getAng();
     void setDirection(int);
+    void setMicrostep(int*);
     void incrementMotor(int);
     void rotateToPos(float);
     void test();
@@ -36,9 +39,11 @@ class motor{
     
     ~motor();
     
-  //private: //consider making other members private like position, speed, divisions, direction
-    bool checkLimits(float, float);
-    
+  private: //consider making other members private like position, speed, divisions, direction
+    float msDivider;
+    //bool checkLimits(float, float);
+      
+  
 };
 
 extern motor *M1;
