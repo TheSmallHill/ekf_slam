@@ -2,10 +2,15 @@
 #include <stdint.h>
 #include <unistd.h>
 
+#include "../lib/BlackLib/v3_0/BlackLib.h"
 #include "motor.h"
 
 using namespace std;
 using namespace BlackLib;
+
+motor::~motor()
+{
+}
 
 int motor::getPos()
 {
@@ -132,7 +137,7 @@ void motor::test()
 
 }
 
-//BlackLib::BlackGPIO pulse(BlackLib::GPIO_30, BlackLib::output, BlackLib::FastMode);
-//BlackLib::BlackGPIO direc(BlackLib::GPIO_31, BlackLib::output, BlackLib::FastMode);
+BlackLib::BlackGPIO pulse(BlackLib::GPIO_30, BlackLib::output, BlackLib::FastMode);
+BlackLib::BlackGPIO direc(BlackLib::GPIO_31, BlackLib::output, BlackLib::FastMode);
 
-//motor *M1 = new motor(&pulse, &direc);
+motor *M1 = new motor(&pulse, &direc);
