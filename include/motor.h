@@ -13,17 +13,17 @@ class motor{
     float position;
     float positionMax;
     float positionMin;
-    float stepSize;
-    int numSteps;
-    int direction;
+    float stepSize = 1.8;
+    int numSteps = 200;
+    int direction = 0;
     float speed;
     float speedMax;
     int ms[3] = {0, 0, 0};
       
     int getPos();
     float getAng();
-    void setDirection(int);
-    void setMicrostep(int*);
+    int setDirection(int);
+    int setMicrostep(int*);
     void incrementMotor(int);
     void rotateToPos(float);
     void test();
