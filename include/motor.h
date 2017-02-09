@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cstdint>
 #include <stdint.h>
-#include "..///BlackLib.h"
+#include "../lib/BlackLib/v3_0/BlackLib.h"
 
 using namespace std;
 
@@ -16,9 +16,10 @@ class motor{
     int direction;
     float speed;
     float speedMax;
-    uint8_t microStepping;
+    int microStepping[3];
      
     void setPos(float, float);
+    float getPot();
     void setDirection(int);
     void incrementMotor(int);
     void rotateToPos(float);
@@ -27,13 +28,9 @@ class motor{
     BlackGPIO& stepPin;
     BlackGPIO& directionPin;
     BlackGPIO& enablePin;
-    BlackGPIO& resetPin;
     BlackGPIO& sleepPin;
-    BlackGPIO& ms1Pin;
-    BlackGPIO& ms2Pin;
-    BlackGPIO& ms3Pin;
 
-    motor(BlackLib::BlackGPIO* stepPin, BlackLib::BlackGPIO* directionPin, BlackLib::BlackGPIO* enablePin, BlackLib::BlackGPIO* resetPin, BlackLib::BlackGPIO* sleepPin, BlackLib::BlackGPIO* ms1Pin, BlackLib::BlackGPIO* ms2Pin, BlackLib::BlackGPIO* ms3Pin) : stepPin(*stepPin), directionPin(*directionPin), enablePin(*enablePin), resetPin(*resetPin), sleepPin(*sleepPin), ms1Pin(*ms1Pin), ms2Pin(*ms2Pin), ms3Pin(*ms3Pin) 
+    motor(BlackLib::BlackGPIO* stepPin, BlackLib::BlackGPIO* directionPin, BlackLib::BlackGPIO* enablePin, BlackLib::BlackGPIO* sleepPin) : stepPin(*stepPin), directionPin(*directionPin), enablePin(*enablePin), sleepPin(*sleepPin) 
     {
     }
     
