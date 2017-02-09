@@ -6,68 +6,45 @@ BlackLib::BlackGPIO enable;
 
 //when putting this onto beaglebone, rewrite these next 2 lines (don't include them and instead do it like BlackLib::BlackGPIO or whatever for each function, should avoid issues that way)
 using namespace std;
-//using namespace BlackLib;
-
-//int countResp;
-//int rows_temp = 1;
-//extern unsigned char* temp[6];
-
-//change these to whatever GPIO is desired
 
 int initializeUART(){
-	// initialized by user before running program? or use BlackLib if it does the same thing
+	
+	// put in the UART initialization used in BlackLib?
+	
 	return(0);
 }
 
 int initializeGPIO(){
 
-/*BlackLib::BlackGPIO step(BlackLib::GPIO_51,BlackLib::output,BlackLib::FastMode);
-BlackLib::BlackGPIO enable(BlackLib::GPIO_22,BlackLib::output,BlackLib::FastMode);
-BlackLib::BlackGPIO direction(BlackLib::GPIO_60,BlackLib::output,BlackLib::FastMode);
-*/
-//	BlackGPIO step(GPIO_39,output,fastmode);
-//	BlackGPIO enable(GPIO_67,output,fastmode);
-//	BlackGPIO direc(GPIO_35,output,fastmode);
-
-step(BlackLib::GPIO_30,BlackLib::output,BlackLib::FastMode);
-direc(BlackLib::GPIO_31,BlackLib::output,BlackLib::FastMode);
-enable(BlackLib::GPIO_60,BlackLib::output,BlackLib::SecureMode);
+	// set up GPIO ports
+	step(BlackLib::GPIO_30,BlackLib::output,BlackLib::FastMode);
+	direc(BlackLib::GPIO_31,BlackLib::output,BlackLib::FastMode);
+	enable(BlackLib::GPIO_60,BlackLib::output,BlackLib::SecureMode);
 	
+	// set initial states
 	enable.setValue(BlackLib::high);
-	
 	step.setValue(BlackLib::low);
-
 	direc.setValue(BlackLib::low);	
 
-//	string pinValue = enable.getValue();
-
-//	cout << pinValue << endl;	
-
-//	enable.setValue(BlackLib::low); //enable is active low on the motor driver
-
-//	pinValue = enable.getValue();
-
-//	cout << pinValue << endl;
-
+	// add code to check that they were set up correctly and then give a return value
+	
 	return(0);
 
 }
 
 int initializeXbee(){
-// to be written
+
+	// to be written
+
 }
 
 int incrementMotor(int steps, int dir, float &angle) {
 		
-//	BlackLib::BlackGPIO step(BlackLib::GPIO_30,BlackLib::output,BlackLib::FastMode);
-//	BlackLib::BlackGPIO enable(BlackLib::GPIO_60,BlackLib::output,BlackLib::SecureMode);
-//	BlackLib::BlackGPIO direc(BlackLib::GPIO_31,BlackLib::output,BlackLib::FastMode);
-
 	struct timespec tim, tim2;
 	tim.tv_sec = 0;
 	tim.tv_nsec = 1000000L;
 
-//set direction based on input
+	//set direction based on input
 	if (dir == 0) {
 		direc.setValue(BlackLib::low); //rotate clockwise
 	} else if (dir == 1) {
