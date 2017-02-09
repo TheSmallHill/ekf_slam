@@ -4,7 +4,7 @@ BlackLib::BlackGPIO step;
 BlackLib::BlackGPIO direc;
 BlackLib::BlackGPIO enable;
 
-//when putting this onto beaglebone, rewrite these next 2 lines (don't include them and instead do it like BlackLib::BlackGPIO or whatever for each function, should avoid issues that way)
+// Final version should not use the next line
 using namespace std;
 
 int initializeUART(){
@@ -45,9 +45,9 @@ int incrementMotor(int steps, int dir, float &angle) {
 	tim.tv_nsec = 1000000L;
 
 	//set direction based on input
-	if (dir == 0) {
+	if (dir == CW) {
 		direc.setValue(BlackLib::low); //rotate clockwise
-	} else if (dir == 1) {
+	} else if (dir == CCW) {
 		direc.setValue(BlackLib::high); //rotate counterclockwise
 	}
 	
@@ -63,11 +63,11 @@ int incrementMotor(int steps, int dir, float &angle) {
 		nanosleep(&tim, &tim2);
 	
 		//change counter accordingly so the angle is known
-		if (dir == 0) {
+		if (dir == CW) {
 	
 			angle -= 0.1125;
 	
-		} else if (dir == 1) {
+		} else if (dir == CCW) {
 	
 			angle += 0.1125;
 
@@ -86,11 +86,11 @@ int rotate2Angle(float &angle, float desAngle) {
 	int dir;
 
 	if (desAngle < angle) {
-		dir = 0;
+		dir = CW;
 	} else if (desAngle > angle) {
-		dir = 1;
+		dir = CCW;
 	} else {
-	dir = 0;
+		dir = CW;
 	}
 
 	int steps = abs((desAngle - angle)/0.1125);
@@ -320,11 +320,15 @@ void saveData(double* ranges, double* bearings, double* DAtable){
 }
 
 int shutdownUART(){
-//to be written
+
+	//to be written
+
 }
 
 int shutdownGPIO(){
-//to be written
+
+	// There is currently no BlackLib functionality for shutting down GPIO pins
+
 }
 
 int shutdownXbee(){
