@@ -30,10 +30,8 @@ class motor{
     
     BlackGPIO& stepPin;
     BlackGPIO& directionPin;
-    BlackGPIO& enablePin;
-    BlackGPIO& sleepPin;
 
-    motor(BlackLib::BlackGPIO* stepPin, BlackLib::BlackGPIO* directionPin, BlackLib::BlackGPIO* enablePin, BlackLib::BlackGPIO* sleepPin) : stepPin(*stepPin), directionPin(*directionPin), enablePin(*enablePin), sleepPin(*sleepPin) 
+    motor(BlackLib::BlackGPIO* stepPin, BlackLib::BlackGPIO* directionPin) : stepPin(*stepPin), directionPin(*directionPin) 
     {
     }
     
