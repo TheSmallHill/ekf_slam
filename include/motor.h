@@ -8,32 +8,35 @@ using namespace std;
 
 class motor{
   
-  public:
+  float stepSize = 1.8;
+  //int numSteps = 200;
   
-    float position;
-    float positionMax;
-    float positionMin;
-    float stepSize = 1.8;
-    int numSteps = 200;
-    int direction = 0;
-    float speed;
-    float speedMax;
-    int ms[3] = {0, 0, 0};
+  public:
+    
+    float pos;
+    float posMax;
+    float posMin;  
+    int direction;
+    //float speed;
+    //float speedMax;
+    int ms[3];
       
     int getPos();
     float getAng();
     int setDirection(int);
+    int getDirection();
     int setMicrostep(int*);
     void incrementMotor(int);
-    void rotateToAng(float);
+    //void rotateToAng(float);
     void test();
     
     BlackGPIO& stepPin;
     BlackGPIO& directionPin;
-
-    motor(BlackLib::BlackGPIO* stepPin, BlackLib::BlackGPIO* directionPin) : stepPin(*stepPin), directionPin(*directionPin) 
-    {
-    }
+    BlackGPIO& ms1Pin(BlackLib::GPIO_39,BlackLib::output,BlackLib::FastMode);
+    BlackGPIO& ms2Pin(BlackLib::GPIO_35,BlackLib::output,BlackLib::FastMode);
+    BlackGPIO& ms3Pin(BlackLib::GPIO_67,BlackLib::output,BlackLib::FastMode);
+  
+    motor(BlackLib::BlackGPIO* stepPin, BlackLib::BlackGPIO* directionPin) : stepPin(*stepPin), directionPin(*directionPin) { }
     
     ~motor();
     
@@ -44,4 +47,4 @@ class motor{
   
 };
 
-extern motor *M1;
+//extern motor *M1;
