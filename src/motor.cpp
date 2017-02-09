@@ -59,7 +59,7 @@ int motor::getDirection()
 
 }
 
-int motor::setMicrostep(int* ms[3])
+int motor::setMicrostep(int ms[3])
 {
 
  if (ms[0] == 0 && ms[1] == 0 && ms[2] == 0 ) {
