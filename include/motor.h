@@ -32,10 +32,11 @@ class motor{
     
     BlackGPIO& stepPin;
     BlackGPIO& directionPin;
-    BlackGPIO& ms1Pin(BlackLib::GPIO_39,BlackLib::output,BlackLib::FastMode);
+  /*  
+  BlackGPIO& ms1Pin(BlackLib::GPIO_39,BlackLib::output,BlackLib::FastMode);
     BlackGPIO& ms2Pin(BlackLib::GPIO_35,BlackLib::output,BlackLib::FastMode);
     BlackGPIO& ms3Pin(BlackLib::GPIO_67,BlackLib::output,BlackLib::FastMode);
-  
+  */
     motor(BlackLib::BlackGPIO* stepPin, BlackLib::BlackGPIO* directionPin) : stepPin(*stepPin), directionPin(*directionPin) { }
     
     ~motor();
@@ -47,4 +48,4 @@ class motor{
   
 };
 
-//extern motor *M1;
+extern motor *M1;
