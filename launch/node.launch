@@ -1,4 +1,4 @@
 <launch>
-	<node pkg="slam_exp" name="slamExperiment" type="slamExperiment" output="screen" launch-prefix="sudo">
+	<node pkg="ekf_slam" name="slamExperiment" type="slamExperiment" output="screen" launch-prefix="sudo">
 	</node>
 </launch>
