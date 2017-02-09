@@ -5,6 +5,7 @@
 #include "../lib/BlackLib/v3_0/BlackLib.h"
 
 using namespace std;
+using namespace BlackLib;
 
 class motor{
   
@@ -25,7 +26,7 @@ class motor{
     float getAng();
     int setDirection(int);
     int getDirection();
-    int setMicrostep(int*);
+    int setMicrostep(int);
     void incrementMotor(int);
     //void rotateToAng(float);
     void test();
