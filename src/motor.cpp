@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <stdint.h>
 #include <unistd.h>
 
@@ -43,7 +44,7 @@ int motor::setDirection(int dir)
     
   }
   
-  if ((directionPin.isHigh() && dir == 1) || (!directionPin.isHigh() && dir == 0)) {
+  if ((directionPin.isHigh() && (dir == 1)) || (!directionPin.isHigh() && (dir == 0))) {
   
     return(1);
     
@@ -54,7 +55,7 @@ int motor::setDirection(int dir)
 int motor::getDirection()
 {
 
-  return directionPin.getValue();
+  return stoi(directionPin.getValue());
 
 }
 
@@ -73,7 +74,7 @@ int motor::setMicrostep(int* ms[3])
   msDivider = 16; //sixteenth step
  }
 
-  if (ms1Pin.getValue() == ms[0] && ms2Pin.getValue() == ms[1] && ms3Pin.getValue() == ms[2]) {
+  if (stoi(ms1Pin.getValue()) == ms[0] && stoi(ms2Pin.getValue()) == ms[1] && stoi(ms3Pin.getValue()) == ms[2]) {
    return(1); 
   } else return(0);
   
