@@ -3,14 +3,6 @@ A ROS package written to implement an Extended Kalman Filter - Simultaneous Loca
 
 ## About
 
-
-### Parts
-- Beaglebone Black rev C
-- Big Easy Driver
-- 200 steps/rev stepper motor
-- XBee s2c 
-
-## Setup
+## Installation
 
 ## Use
-The current use of this project is to run a test of our rotating reflector subsystem that will be used in the final implementation.
