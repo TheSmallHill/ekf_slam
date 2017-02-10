@@ -23,8 +23,8 @@ class Observer {
 
   public:
     
-    Oberver(); //constructor, start uart, connect to xbee, create results
-    ~Observer(); //destructor
+    Oberver(); //constructor, start uart, connect to xbee, create results, figure out what values should be passed to constructor
+    ~Observer(); //destructor, shutdown xbee, shutdown uart, delete dynamically allocated arrays
     void doOberservation(); //Start performing an observation, only one
     void newScan(); //prepare for a new set of observations (clear results, reset numObservations)
     void calibrate(int, int);
