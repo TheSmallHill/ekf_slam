@@ -4,30 +4,30 @@
 #include <unistd.h>
 
 #include "../lib/BlackLib/v3_0/BlackLib.h"
-#include "motor.h"
+#include "Motor.h"
 
 using namespace std;
 using namespace BlackLib;
 
-motor::~motor()
+Motor::~Motor()
 {
 }
 
-int motor::getPos()
+int Motor::getPos()
 {
 
   return pos;
   
 }
 
-float motor::getAng()
+float Motor::getAng()
 {
 
   return (pos*stepSize)/msDivider;
 
 }
 
-int motor::setDirection(int dir)
+int Motor::setDirection(int dir)
 {
 
   if (dir == 0) { //clockwise
@@ -52,14 +52,14 @@ int motor::setDirection(int dir)
 
 }
 
-int motor::getDirection()
+int Motor::getDirection()
 {
 
   return stoi(directionPin.getValue());
 
 }
 
-int motor::setMicrostep(int ms[3])
+int Motor::setMicrostep(int ms[3])
 {
 
  if (ms[0] == 0 && ms[1] == 0 && ms[2] == 0 ) {
@@ -80,7 +80,7 @@ int motor::setMicrostep(int ms[3])
   
 }
 
-void motor::incrementMotor(int steps)
+void Motor::incrementMotor(int steps)
 {
 
   // figure out how to change speed  
@@ -110,7 +110,7 @@ void motor::incrementMotor(int steps)
 
 }
 /*
-void motor::rotateToAng(float desiredAngle)
+void Motor::rotateToAng(float desiredAngle)
 {
 
   float angle = (pos*stepSize)/msDivider;
@@ -131,7 +131,7 @@ void motor::rotateToAng(float desiredAngle)
   
 }
 */
-void motor::test()
+void Motor::test()
 {
 
   cout << "Test successful!" << endl;
@@ -141,4 +141,4 @@ void motor::test()
 BlackLib::BlackGPIO pulse(BlackLib::GPIO_30, BlackLib::output, BlackLib::FastMode);
 BlackLib::BlackGPIO direc(BlackLib::GPIO_31, BlackLib::output, BlackLib::FastMode);
 
-motor *M1 = new motor(&pulse, &direc);
+Motor *M1 = new Motor(&pulse, &direc);
