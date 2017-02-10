@@ -7,7 +7,7 @@
 using namespace std;
 using namespace BlackLib;
 
-class motor{
+class Motor{
   
   float stepSize = 1.8;
   //int numSteps = 200;
@@ -38,9 +38,9 @@ class motor{
     BlackGPIO& ms2Pin(BlackLib::GPIO_35,BlackLib::output,BlackLib::FastMode);
     BlackGPIO& ms3Pin(BlackLib::GPIO_67,BlackLib::output,BlackLib::FastMode);
   */
-    motor(BlackLib::BlackGPIO* stepPin, BlackLib::BlackGPIO* directionPin) : stepPin(*stepPin), directionPin(*directionPin) { }
+    Motor(BlackLib::BlackGPIO* stepPin, BlackLib::BlackGPIO* directionPin) : stepPin(*stepPin), directionPin(*directionPin) { }
     
-    ~motor();
+    ~Motor();
     
   private: //consider making other members private like position, speed, divisions, direction
     float msDivider;
@@ -49,4 +49,4 @@ class motor{
   
 };
 
-extern motor *M1;
+extern Motor *M1;
