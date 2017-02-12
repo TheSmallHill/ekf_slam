@@ -3,13 +3,6 @@ A ROS package written to implement an Extended Kalman Filter - Simultaneous Loca
 
 ## About
 
-
-### Parts
-- Beaglebone Black rev C
-- Big Easy Driver
-- 200 steps/rev stepper motor
-- XBee s2c 
-
 ## Setup
 
 ## Use
