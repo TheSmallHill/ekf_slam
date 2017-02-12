@@ -26,19 +26,19 @@ class Motor{
     float getAng();
     int setDirection(int);
     int getDirection();
-    int setMicrostep(int);
+    int setMicrostep(int*);
     void incrementMotor(int);
     //void rotateToAng(float);
     void test();
     
     BlackGPIO& stepPin;
     BlackGPIO& directionPin;
-  /*  
-  BlackGPIO& ms1Pin(BlackLib::GPIO_39,BlackLib::output,BlackLib::FastMode);
-    BlackGPIO& ms2Pin(BlackLib::GPIO_35,BlackLib::output,BlackLib::FastMode);
-    BlackGPIO& ms3Pin(BlackLib::GPIO_67,BlackLib::output,BlackLib::FastMode);
-  */
-    Motor(BlackLib::BlackGPIO* stepPin, BlackLib::BlackGPIO* directionPin) : stepPin(*stepPin), directionPin(*directionPin) { }
+    
+    BlackGPIO& ms1Pin;
+    BlackGPIO& ms2Pin;
+    BlackGPIO& ms3Pin;
+  
+    Motor(BlackLib::BlackGPIO* stepPin, BlackLib::BlackGPIO* directionPin, BlackLib::BlackGPIO* ms1Pin, BlackLib::BlackGPIO* ms2Pin, BlackLib::BlackGPIO* ms3Pin) : stepPin(*stepPin), directionPin(*directionPin), ms1Pin(*ms1Pin), ms2Pin(*ms2Pin), ms3Pin(*ms3Pin) {}
     
     ~Motor();
     
@@ -49,4 +49,4 @@ class Motor{
   
 };
 
-extern Motor *M1;
+//extern Motor *M1;

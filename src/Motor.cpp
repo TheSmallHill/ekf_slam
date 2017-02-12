@@ -138,7 +138,12 @@ void Motor::test()
 
 }
 
-BlackLib::BlackGPIO pulse(BlackLib::GPIO_30, BlackLib::output, BlackLib::FastMode);
+/*
+BlackLib::BlackGPIO step(BlackLib::GPIO_30, BlackLib::output, BlackLib::FastMode);
 BlackLib::BlackGPIO direc(BlackLib::GPIO_31, BlackLib::output, BlackLib::FastMode);
+BlackLib::BlackGPIO ms1(BlackLib::GPIO_39,BlackLib::output,BlackLib::FastMode);
+BlackLib::BlackGPIO ms2(BlackLib::GPIO_35,BlackLib::output,BlackLib::FastMode);
+BlackLib::BlackGPIO ms3(BlackLib::GPIO_67,BlackLib::output,BlackLib::FastMode);
 
-Motor *M1 = new Motor(&pulse, &direc);
+Motor *M1 = new Motor(&step, &direc, &ms1, &ms2, &ms3);
+*/
