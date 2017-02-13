@@ -11,6 +11,8 @@
 #include <semaphore.h>
 #include <errno.h>
 #include <time.h>
+#include <map>
+//#include <vector>
 
 #include <xbeep.h>
 
@@ -18,18 +20,16 @@
 #include "remotenode.h"
 #include "atcon.h"
 
-//using namespace std;
-//using namespace BlackLib;
-//using namespace libxbee;
-
 // struct to hold a single observation
 typedef struct observation{
-  int ID;
+  	int ID;
 	std::string name;
-  float angle;
-  int RSSI;
-  float distance;
+  	float angle;
+  	int rssi;
+  	float distance;
 } obs;
+
+//typedef std::vector<std::vector<obs> > obsArray;
 
 class Observer {
 
@@ -37,21 +37,21 @@ class Observer {
 
   public:
     
-    	Observer(); //constructor, start uart, connect to xbee, create results, figure out what values should be passed to constructor
+    	Observer(/* what should be passed to the constructor? */); 
     	~Observer(); //destructor, shutdown xbee, shutdown uart, delete dynamically allocated arrays	
     
-//	virtual void observationCB(struct xbee*, struct xbee_con*, struct xbee_pkt**, void**);	
-	void doObservation(float); //Start performing an observation, only one
+	std::vector<obs> doObservation(float); //Start performing an observation, only one	
 	void newScan(); //prepare for a new set of observations (clear results, reset numObservations)
     	void calibrate(int, int);
-    	void processData(); // go through results, convert to distance, find range and bearing for each beacon, save to results  
-    	obs** getResults(); //returns pointer to the final, processed array
+    	void processData(std::vector<std::vector<obs> >); // go through results, convert to distance, find range and bearing for each beacon, save to results  
+     	void printData(std::vector<std::vector<obs> >); //print data to the screen
+	void saveData(std::vector<std::vector<obs> >); //and possibly other arguments
   
   private:
   
     	
     	float findBearing(); //find bearing for 1 beacon
-    	float toDistance(int); //convert one RSSI to distance
+    	float toDistance(obs); //convert one RSSI to distance
   
 	libxbee::XBee* xbee;
 	BlackLib::BlackUART* uart;	
@@ -60,11 +60,6 @@ class Observer {
     	
 
   protected:
-  	obs** observedData; //2D array of observations (array will still be organized by angle and ID but this will make processing easier)
-    	int numObs;
+  	/* no protected members yet */
   
 };
-
-/*Observer: public ConCallback::ConCallback {
-
-};*/

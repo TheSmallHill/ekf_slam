@@ -2,10 +2,9 @@
 #include <iostream>
 #include <cstdint>
 #include <stdint.h>
-#include "../lib/BlackLib/v3_0/BlackLib.h"
+#include <xbeep.h>
 
-//using namespace std;
-//using namespace BlackLib;
+#include "../lib/BlackLib/v3_0/BlackLib.h"
 
 class Motor{
   
@@ -18,8 +17,6 @@ class Motor{
     float posMax;
     float posMin;  
     int direction;
-    //float speed;
-    //float speedMax;
     int ms[3];
       
     int getPos();
@@ -28,7 +25,6 @@ class Motor{
     int getDirection();
     int setMicrostep(int*);
     void incrementMotor(int);
-    //void rotateToAng(float);
     void test();
     
     BlackLib::BlackGPIO& stepPin;
@@ -48,5 +44,3 @@ class Motor{
       
   
 };
-
-//extern Motor *M1;

@@ -1,6 +1,8 @@
+#include <xbeep.h>
+
 #include "remotenode.h"
 
-remotenode::remotenode(std::vector<unsigned char> nd_payload) { /* find how to extract RSSI from nd_payload */
+remotenode::remotenode(std::vector<unsigned char> nd_payload) { 
 	int i = 0;
 
 	this->addr16  = (nd_payload[i + 0] << 8) & 0xFF00;
@@ -23,5 +25,9 @@ remotenode::remotenode(std::vector<unsigned char> nd_payload) { /* find how to e
 	for (; i < nd_payload.size(); i++) {
 		this->name += char(nd_payload[i]);
 	}
-	
+
+	/* find how to extract RSSI from nd_payload, this might work since it is
+	 * essentially how it was done in the C implementation... */
+	this->rssi = std::stoi(this->name); 	
+
 }

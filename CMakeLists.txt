@@ -27,15 +27,15 @@ add_subdirectory (${BlackLib})
 add_library(Motor src/Motor.cpp)
 target_link_libraries(Motor BlackLib)
 
-add_library(remotenode src/remotenode.cpp)
-target_link_libraries(remotenode xbee)
-
 add_library(atcon src/atcon.cpp)
-target_link_libraries(atcon xbee remotenode)
+target_link_libraries(atcon xbeep)
+
+add_library(remotenode src/remotenode.cpp)
+target_link_libraries(atcon remotenode)
 
 add_library(Observer src/Observer.cpp)
-target_link_libraries(Observer remotenode atcon xbee)
-
+target_link_libraries(Observer remotenode)
+target_link_libraries(Observer atcon)
 
 
 # Add slamLib library, link with BlackLib and libxbee
@@ -47,11 +47,17 @@ add_executable(slamExperiment src/main.cpp)
 
 # Link libraries to executable
 target_link_libraries(slamExperiment ${catkin_LIBRARIES})
+target_link_libraries(slamExperiment atcon)
 
 # More linking
 # target_link_libraries(slamExperiment slamLib)
-target_link_libraries(slamExperiment BlackLib)
-target_link_libraries(slamExperiment xbee)
 target_link_libraries(slamExperiment Motor)
+target_link_libraries(slamExperiment BlackLib)
+target_link_libraries(slamExperiment remotenode)
+target_link_libraries(slamExperiment atcon)
 target_link_libraries(slamExperiment Observer)
 
+# target_link_libraries(slamExperiment xbee)
+# target_link_libraries(slamExperiment remotenode)
+# target_link_libraries(slamExperiment Motor)
+target_link_libraries(slamExperiment Observer)

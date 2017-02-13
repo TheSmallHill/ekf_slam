@@ -5,14 +5,11 @@
 #include <unistd.h>
 #include <list>
 #include <iomanip>
-//#include <string>
+#include <string>
 
 #include <xbeep.h>
 
 #include "remotenode.h"
-
-//using namespace libxbee;
-//using namespace std;
 
 class atcon: public libxbee::ConCallback {
 	public:
@@ -23,6 +20,5 @@ class atcon: public libxbee::ConCallback {
 		void start_node_detect(void);
 		bool node_detect_complete;
 		std::list<remotenode> node_list; 
-		//std::list<string> name_list;
-		//std::list<int> rssi_list;
+	
 };

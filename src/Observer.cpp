@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <string>
+
 #include <xbeep.h>
 
 #include "../lib/BlackLib/v3_0/BlackLib.h"
@@ -12,6 +13,7 @@
 
 #define BAUDRATE 9600
 
+/* observer object constructor */
 Observer::Observer()
 {
   	//start uart using BlackLib, specified by constructor arguments
@@ -19,39 +21,39 @@ Observer::Observer()
 		
 	bool isOpened = uart->open(BlackLib::ReadWrite | BlackLib::NonBlock);
 
-    	if( !isOpened )
+    	if(!isOpened)
     	{
         	std::cout << "UART DEVICE CAN\'T OPEN.;" << std::endl;
         	exit(1);
     	}
 
-  	//start xbee (default xbee2 but could have argument passed to constructor)
+  	/* have some of these arguments passed to constructor */
 	xbee = new libxbee::XBee("xbee2", "dev/ttyS1", BAUDRATE);	
 	con = new atcon(*xbee, "Local AT");	
 
   	//create new array for results to be stored, only starting point since we do not know how many beacons there are
-  	observedData = new obs*[1];
-	//numObservations = 0;
+  	//observedData = new obs*[1];
+	//observedData = new std::map<int,obs>;	
+
 }
 
+/* observer object destructor */
 Observer::~Observer()
 {
 
-  	//shutdown xbee
+  	/* delete objects and arrays created by constructor */
 	delete xbee;
-  
-	//shutdown uart
 	delete uart;
-  
-	//delete dynamically allocated arrays
-  	delete observedData;
+    	//delete observedData;
+
 }
 
-void Observer::doObservation(float angle)
+/* do an observation */
+std::vector<obs> Observer::doObservation(float angle)
 {
 	
-	int numBeacons = 0;
-	//string temp;
+	std::vector<obs> tempObservations;
+	obs temp;	
 
 	/* start detecting nodes */ 
 	con->start_node_detect();
@@ -61,7 +63,7 @@ void Observer::doObservation(float angle)
 		usleep(100000); /* wait for .1 second */
 	}
 
-	observedData[numObs] = new obs[con->node_list.size()];
+	//observedData[numObs] = new obs[con->node_list.size()];
 
 	/* save and print out a list of nodes */
 	for (std::list<remotenode>::iterator n = con->node_list.begin(); n != con->node_list.end(); n++) {
@@ -69,38 +71,31 @@ void Observer::doObservation(float angle)
 		/* it's just easier to print nice-looking output using printf()... */
 		printf("Node: %-20s  0x%04X  0x%08X 0x%08X\n", n->getName().c_str(), n->getAddr16(), n->getAddr64Hi(), n->getAddr64Lo());	
 		
-		/* but also save to a temporary variable */
-		numBeacons++;				
-		observedData[numObs][numBeacons].name = n->getName().c_str();
-		/* figure out how to extract rssi */	
-		
+		/* save to another vector so it can be returned */	
+		temp.name = n->getName().c_str();
+		temp.rssi = n->getRssi();		
+		tempObservations.push_back(temp);				
+
 	}  
-
-	//for (std::list<string>::iterator n = con->node_list.begin(); n!= con->node_list.end(); n++) {
-
-	//	temp = n->
 	
-	//}
+	return(tempObservations); // tempObservations out of scope once this method ends 	
 
-
-  	//increment numObservations
-  	numObs++;
-  
 }
 
+/* prepare for a new scan of all angles, may be unnecessary for the Observer class since all results are not kept within the class */
 void Observer::newScan()
 {
 
   	//reallocate the observedData array to an empty 1x1, ready for next observations at angle
-	  
+	//delete observedData;
+	//obs** observedData = new obs*[1];  
 
   	//reset numObservations
-  	this->numObs = 0;
+  	//this->numObs = 0;
 
 }
 
-//Observer::calibrate(){}
-
+/* process the data (find range and bearing) */
  void Observer::processData()
 {
 
@@ -109,21 +104,16 @@ void Observer::newScan()
 
 }
 
-obs** Observer::getResults()
+/* get the pointer to the results array */
+/*obs** Observer::getResults()
 {
 
   //return pointer to all the observed data
   return(observedData);
 
-}
+}*/
 
-/*void Observer::observationCB(struct xbee *xbee, struct xbee_con *con, struct xbee_pkt **pkt, void **data)
-{
-
-  
-
-}
-*/
+/* find the bearing for one column */
 float Observer::findBearing(/*somehow pass a column?*/)
 {
 
@@ -133,16 +123,11 @@ float Observer::findBearing(/*somehow pass a column?*/)
 return(0);
 }
 
-float Observer::toDistance(int rssi)
+/* convert rssi to distance */
+float Observer::toDistance(obs data)
 {
 
   //convert provided rssi to distance
  
 return(0); 
 }
-
-/*void ObserverCB::observationCB(struct xbee *xbee, struct xbee_con *con, struct xbee_pkt **pkt, void **data){
-
-
-
-}*/

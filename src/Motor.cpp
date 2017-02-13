@@ -6,13 +6,12 @@
 #include "../lib/BlackLib/v3_0/BlackLib.h"
 #include "Motor.h"
 
-//using namespace std;
-//using namespace BlackLib;
-
+/* motor destructor */
 Motor::~Motor()
 {
 }
 
+/* get position of motor */
 int Motor::getPos()
 {
 
@@ -20,6 +19,7 @@ int Motor::getPos()
   
 }
 
+/* get angle of motor */
 float Motor::getAng()
 {
 
@@ -27,6 +27,7 @@ float Motor::getAng()
 
 }
 
+/* set the direction the motor will move in*/
 int Motor::setDirection(int dir)
 {
 
@@ -52,6 +53,7 @@ int Motor::setDirection(int dir)
 
 }
 
+/* get the value for what direction the motor is currently set to*/
 int Motor::getDirection()
 {
 
@@ -59,6 +61,7 @@ int Motor::getDirection()
 
 }
 
+/* set the microstepping pins for the motor controller*/
 int Motor::setMicrostep(int ms[3])
 {
 
@@ -80,6 +83,7 @@ int Motor::setMicrostep(int ms[3])
   
 }
 
+/* increment the motor a certain number of steps*/
 void Motor::incrementMotor(int steps)
 {
 
@@ -104,46 +108,20 @@ void Motor::incrementMotor(int steps)
     
       pos++;
     
-    } else {}
+    } else {
+
+	pos = pos;
+
+	}
     
   }
 
 }
-/*
-void Motor::rotateToAng(float desiredAngle)
-{
 
-  float angle = (pos*stepSize)/msDivider;
-
-  if (desiredAngle < angle) {
-  
-    directionPin.setValue(BlackLib::low);
-  
-  } else if (desiredAngle > angle) {
-  
-    directionPin.setValue(BlackLib::high);
-  
-  } else {} //exit function
-  
-  int steps = abs((desiredAngle-angle)/(stepSize/msDivider));
-  
-  this->incrementMotor(steps);
-  
-}
-*/
+/* test that the object was created successfully*/
 void Motor::test()
 {
 
   std::cout << "Test successful!" << std::endl;
 
 }
-
-/*
-BlackLib::BlackGPIO step(BlackLib::GPIO_30, BlackLib::output, BlackLib::FastMode);
-BlackLib::BlackGPIO direc(BlackLib::GPIO_31, BlackLib::output, BlackLib::FastMode);
-BlackLib::BlackGPIO ms1(BlackLib::GPIO_39,BlackLib::output,BlackLib::FastMode);
-BlackLib::BlackGPIO ms2(BlackLib::GPIO_35,BlackLib::output,BlackLib::FastMode);
-BlackLib::BlackGPIO ms3(BlackLib::GPIO_67,BlackLib::output,BlackLib::FastMode);
-
-Motor *M1 = new Motor(&step, &direc, &ms1, &ms2, &ms3);
-*/

@@ -1,10 +1,23 @@
+#include <stdint.h>
+#include <iostream>
+#include <string.h>
+#include <unistd.h>
+#include <list>
+#include <iomanip>
+
+#include <xbeep.h>
+
 #include "Motor.h"
 #include "Observer.h"
-
-//using namespace std;
-//using namespace BlackLib;
+#include "atcon.h"
+#include "remotenode.h"
 
 int main(void){
+
+{
+/* make a vector of vectors to store results, much easier than a dynamic array */
+std::vector<obs> obsRow;
+std::vector<std::vector<obs> > obsArray;
 
 /* Define pins for Motor object */	
 BlackLib::BlackGPIO step(BlackLib::GPIO_30, BlackLib::output, BlackLib::FastMode);
@@ -17,15 +30,49 @@ BlackLib::BlackGPIO ms3(BlackLib::GPIO_67,BlackLib::output,BlackLib::FastMode);
 Motor *M1 = new Motor(&step, &direc, &ms1, &ms2, &ms3);
 
 /* Motor object initializations */
-M1->pos=0;
-M1->posMax = 90;
-M1->posMin = -90;
+M1->pos=-180;
+M1->posMax = 180;
+M1->posMin = -180;
 M1->direction = 0;
 M1->ms[0] = 0;
 M1->ms[1] = 0;
 M1->ms[2] = 0;	
 
+Observer *xbee = new Observer();
 
+while(1){
+	
+	obsRow = xbee->doObservation(M1->getAng());
+	obsArray.push_back(obsRow);
+
+	M1->incrementMotor(1);
+
+	if (M1->getAng() >= 180) break;
+
+}
+
+/* print out the results */
+std::vector<std::vector<obs> >::iterator row;
+std::vector<obs>::iterator col;
+for(row = obsArray.begin(); row != obsArray.end(); row++){	
+
+	for (col = row->begin(); col!=row->end(); col++) {
+
+		if (col == row->begin()) {
+
+			std::cout << "| Angle = " << col->angle;
+
+		}
+
+		std::cout << "| ID: " << col->name << " RSSI: " << col->rssi;
+
+	}
+
+	std::cout << "|" << std::endl;
+
+}
+
+} // all objects out of scope after this curly bracket
 
 return(0);
 	
