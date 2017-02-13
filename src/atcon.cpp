@@ -1,13 +1,13 @@
 #include "atcon.h"
 
-using namespace libxbee;
-using namespace std;
+//using namespace libxbee;
+//using namespace std;
 
 void atcon::xbee_conCallback(libxbee::Pkt **pkt) {
 	if (!this->node_detect_complete) {
 		if ((*pkt)->getATCommand() != "ND") {
 			/* print an error if we thought we were in the middle of an 'ND' command... */
-			cout << "Early exit of Node Detect...\n";
+			std::cout << "Early exit of Node Detect...\n";
 			this->node_detect_complete = true;
 		}
 	}
@@ -17,23 +17,29 @@ void atcon::xbee_conCallback(libxbee::Pkt **pkt) {
 		return;
 	}
 
-	vector<unsigned char> data = (*pkt)->getVector();
+	//std::vector<unsigned char> data = (*pkt)->getVector(); 
+	//std::string data = (*pkt)->getData();
 
-	if (data.size() == 0) {
+	//if (data.size() == 0) {
+	if ((*pkt)->size() == 0) {	
 		/* an AT response, with zero data length indicates that the scan is complete */
-		cout << "Scan Complete!\n";
+		std::cout << "Scan Complete!\n";
 		this->node_detect_complete = true;
 		return;
 	}
 
-	if (data.size() < 11) {
+	//if (data.size() < 11) {
+	if ((*pkt)->size() < 11) {	
 		/* ensure that we have enough data */
-		cout << "Received small packet...\n";
+		std::cout << "Received small packet...\n";
 		return;
 	}
 
 	/* push a new remotenode object into our list */
-	this->node_list.push_back(remotenode(data));
+	//this->node_list.push_back(remotenode(data));
+	//this->name_list.pushback(&((*pkt)->data[10]));
+	//this->rssi_list.pushback((*pkt)->data[10]);
+	printf("%20s - %02X\n", &((*pkt)[10]), (**pkt)[10]);
 }
 
 void atcon::start_node_detect(void) {

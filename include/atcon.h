@@ -5,21 +5,24 @@
 #include <unistd.h>
 #include <list>
 #include <iomanip>
+//#include <string>
 
 #include <xbeep.h>
 
 #include "remotenode.h"
 
-using namespace libxbee;
-using namespace std;
+//using namespace libxbee;
+//using namespace std;
 
-class atcon: public ConCallback {
+class atcon: public libxbee::ConCallback {
 	public:
-		explicit atcon(XBee &parent, string type, struct xbee_conAddress *address = NULL): ConCallback(parent, type, address), node_detect_complete(true) { };
+		explicit atcon(libxbee::XBee &parent, std::string type, struct xbee_conAddress *address = NULL): libxbee::ConCallback(parent, type, address), node_detect_complete(true) { };
 
-		void xbee_conCallback(Pkt **pkt);
+		void xbee_conCallback(libxbee::Pkt **pkt);
 
 		void start_node_detect(void);
 		bool node_detect_complete;
-		list<remotenode> node_list;
+		std::list<remotenode> node_list; 
+		//std::list<string> name_list;
+		//std::list<int> rssi_list;
 };

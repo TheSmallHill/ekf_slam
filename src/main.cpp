@@ -1,8 +1,8 @@
 #include "Motor.h"
 #include "Observer.h"
 
-using namespace std;
-using namespace BlackLib;
+//using namespace std;
+//using namespace BlackLib;
 
 int main(void){
 

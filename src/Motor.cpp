@@ -6,8 +6,8 @@
 #include "../lib/BlackLib/v3_0/BlackLib.h"
 #include "Motor.h"
 
-using namespace std;
-using namespace BlackLib;
+//using namespace std;
+//using namespace BlackLib;
 
 Motor::~Motor()
 {
@@ -32,15 +32,15 @@ int Motor::setDirection(int dir)
 
   if (dir == 0) { //clockwise
   
-    directionPin.setValue(low);
+    directionPin.setValue(BlackLib::low);
     
   } else if (dir == 1) {
   
-    directionPin.setValue(high);
+    directionPin.setValue(BlackLib::high);
   
   } else {
   
-    cout << "Invalid direction" << endl;
+    std::cout << "Invalid direction" << std::endl;
     
   }
   
@@ -134,7 +134,7 @@ void Motor::rotateToAng(float desiredAngle)
 void Motor::test()
 {
 
-  cout << "Test successful!" << endl;
+  std::cout << "Test successful!" << std::endl;
 
 }
 

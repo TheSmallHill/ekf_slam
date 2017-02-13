@@ -18,13 +18,14 @@
 #include "remotenode.h"
 #include "atcon.h"
 
-using namespace std;
-using namespace BlackLib;
-using namespace libxbee;
+//using namespace std;
+//using namespace BlackLib;
+//using namespace libxbee;
 
 // struct to hold a single observation
 typedef struct observation{
   int ID;
+	std::string name;
   float angle;
   int RSSI;
   float distance;
@@ -32,12 +33,14 @@ typedef struct observation{
 
 class Observer {
 
+	//int numObservations;
+
   public:
     
     	Observer(); //constructor, start uart, connect to xbee, create results, figure out what values should be passed to constructor
     	~Observer(); //destructor, shutdown xbee, shutdown uart, delete dynamically allocated arrays	
     
-	virtual void observationCB(struct xbee*, struct xbee_con*, struct xbee_pkt**, void**);	
+//	virtual void observationCB(struct xbee*, struct xbee_con*, struct xbee_pkt**, void**);	
 	void doObservation(float); //Start performing an observation, only one
 	void newScan(); //prepare for a new set of observations (clear results, reset numObservations)
     	void calibrate(int, int);
@@ -50,31 +53,18 @@ class Observer {
     	float findBearing(); //find bearing for 1 beacon
     	float toDistance(int); //convert one RSSI to distance
   
-	XBee* xbee;
+	libxbee::XBee* xbee;
+	BlackLib::BlackUART* uart;	
 	atcon* con;
-	//XBee* transmitter;
-  	//Con* connection;
-	//ConCallback* callback;
+	  
+    	
 
   protected:
-  
-    	int numObservations;  
-    	obs** observedData; //2D array of observations (array will still be organized by angle and ID but this will make processing easier)
+  	obs** observedData; //2D array of observations (array will still be organized by angle and ID but this will make processing easier)
+    	int numObs;
   
 };
 
-class ObserverCB: public ConCallback::ConCallback {
-	public:
-		void observationCB(struct xbee*, struct xbee_con*, struct xbee_pkt**, void**);
-};
+/*Observer: public ConCallback::ConCallback {
 
-/*class atcon: public ConCallback {
-	public:
-		explicit atcon(XBee &parent, std::string type, struct xbee_conAddress *address = NULL): ConCallback(parent, type, address), node_detect_complete(true) { };
-
-		void xbee_conCallback(libxbee::Pkt **pkt);
-
-		void start_node_detect(void);
-		bool node_detect_complete;
-		list<remotenode> node_list;
 };*/
