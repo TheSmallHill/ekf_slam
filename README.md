@@ -1,9 +1,19 @@
-# ekf_slam
-A ROS package written to implement an Extended Kalman Filter - Simultaneous Localization and Mapping system (EKF-SLAM) on a Pioneer 3-DX.
+# Welcome to ekf_slam
+Please note that development for this this project is on going, and the use of
+it is free, but please do not hold us responsible for any damage or injuries that
+may occur.
 
-## About
+## Licensing
+ekf_slam is licensed using GPLv3 from v3.0.5 onwards. For more
+information on what this means for you, please see LICENSE.
 
-## Setup
+## Installation
+This project is being written for the use of a Beaglebone Black running Ubuntu 16.04 LTS
+(available in the Linux directory). 
+During its development, the Beaglebone Black rev C was used for testing.
 
-## Use
-The current use of this project is to run a test of our rotating reflector subsystem that will be used in the final implementation.
+## Building
+
+## Usage
+
+## Interfaces
