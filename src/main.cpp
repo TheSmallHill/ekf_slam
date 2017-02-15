@@ -1,7 +1,7 @@
 /*******************************************************************************************************************************
  * ekf_slam - a work-in-progress ROS node for an Extended Kalman Filter SLAM (Simultaneous Localization and Mapping) algorithm *
  * on a Pioneer 3-DX                                                                                                           *
- *   Copyright (C) 2017  TheSmallHill                                                                                    *
+ *   Copyright (C) 2017  TheSmallHill                                                                                          *
  *                                                                                                                             *
  *   This program is free software: you can redistribute it and/or modify                                                      *
  *   it under the terms of the GNU General Public License as published by                                                      *
