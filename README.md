@@ -23,8 +23,8 @@ check to make sure the file is present. If it is not there, it can be found in t
 of the BlackLib repository forked to my account.
 
 Here are links to both repositories that I have forked for this project:
-https://github.com/attie/libxbee3
-https://github.com/yigityuce/BlackLib
+- https://github.com/attie/libxbee3
+- https://github.com/yigityuce/BlackLib
 
 ## Building
 In order to build the package, it is advised to use the combination of cmake and catkin tools
