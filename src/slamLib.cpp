@@ -1,3 +1,22 @@
+/*******************************************************************************************************************************
+ * ekf_slam - a work-in-progress ROS node for an Extended Kalman Filter SLAM (Simultaneous Localization and Mapping) algorithm *
+ * on a Pioneer 3-DX                                                                                                           *
+ *   Copyright (C) 2017  TheSmallHill                                                                                          *
+ *                                                                                                                             *
+ *   This program is free software: you can redistribute it and/or modify                                                      *
+ *   it under the terms of the GNU General Public License as published by                                                      *
+ *   the Free Software Foundation, either version 3 of the License, or                                                         *
+ *   (at your option) any later version.                                                                                       *
+ *                                                                                                                             *
+ *   This program is distributed in the hope that it will be useful,                                                           *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of                                                            *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                                                             *
+ *   GNU General Public License for more details.                                                                              *
+ *                                                                                                                             *
+ *   You should have received a copy of the GNU General Public License                                                         *
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.                                                     *
+ *******************************************************************************************************************************/
+
 #include "slamLib.h"
 
 //when putting this onto beaglebone, rewrite these next 2 lines (don't include them and instead do it like BlackLib::BlackGPIO or whatever for each function, should avoid issues that way)
