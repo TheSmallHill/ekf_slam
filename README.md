@@ -30,8 +30,11 @@ Here are links to both repositories that I have forked for this project:
 In order to build the package, it is advised to use the combination of cmake and catkin tools
 provided with ROS kinetic. In the root directory of your ROS workspace, use this command to build
 all ROS packages:
+  
   $ catkin_make
+
 Or, for just the ekf_slam package:
+
   $ catkin_make --pkg ekf_slam
   
 Obviously this will only work in a Linux distribution supported by ROS kinetic and has it installed.
@@ -39,6 +42,7 @@ Obviously this will only work in a Linux distribution supported by ROS kinetic a
 ## Usage
 Currently this package is written as a standalone node. To run the node, use this command in the
 root directory of your ROS workspace:
+
   $ roslaunch ekf_slam node.launch
   
 Although there are no current plans to convert this node to a ROS package for use on other
