@@ -57,3 +57,7 @@ will be added to the Interfaces directory of this repository. A new launch file 
 associated executable will also most likely be added to the launch directory.
 
 ## Future work
+Although not currently necessary, I may add CMakeLists.txt to libxbee3 so it can be built
+and installed using cmake. This would make building and installation much simpler. I may also
+continue adding CMakeLists.txt to the BlackLib library so it will build the library in its
+entirety.
