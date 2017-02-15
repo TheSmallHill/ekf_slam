@@ -3,6 +3,16 @@ Please note that development for this this project is on going, and the use of
 it is free, but please do not hold us responsible for any damage or injuries that
 may occur.
 
+## Parts
+Here is the list of parts we are using for our project.
+- Beaglebone Black rev C (https://beagleboard.org/black)
+- 200 step/rev stepper motor (http://www.digikey.com/product-detail/en/sparkfun-electronics/ROB-09238/1568-1105-ND/5318747)
+- Big Easy Driver stepper motor controller (http://www.digikey.com/product-detail/en/sparkfun-electronics/ROB-12859/1568-1066-ND/5172292)
+- XBee s2c (http://www.digikey.com/product-detail/en/XB24CZ7WIT-004/602-1560-ND/5322374?WT.mc_id=IQ_7595_G_pla5322374&wt.srch=1&wt.medium=cpc&WT.srch=1&gclid=CjwKEAiAlZDFBRCKncm67qihiHwSJABtoNIgd-NB0uezDv2EFoaoVTWRJEV3_bQeuC2OznSORwJfrRoCnnzw_wcB)
+- Pioneer 3-DX (http://www.mobilerobots.com/researchrobots/PioneerP3DX.aspx)
+
+You can use parts other than the ones listed above but obviously the code will need to be changed accordingly.
+
 ## Licensing
 ekf_slam is licensed using GPLv3 from v3.0.5 onwards. For more
 information on what this means for you, please see LICENSE.
