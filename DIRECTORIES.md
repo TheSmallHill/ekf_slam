@@ -7,7 +7,7 @@ This is a list of the directories in this repository with a description of the f
 
 ## include
 - slamLib.h - header file associated with slamLib.cpp
-- xbee.h - C header for libxbee3
+- xbeep.h - C++ header for libxbee3 (currently not used correctly since slamLib.cpp uses C functions still)
 
 ## launch
 - node.launch - roslaunch file for starting the node created from main.cpp
