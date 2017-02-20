@@ -3,6 +3,8 @@ Please note that development for this this project is on going, and the use of
 it is free, but please do not hold us responsible for any damage or injuries that
 may occur.
 
+A description of directories and their contents can be found in DIRECTORIES.md within the root directory.
+
 ## Parts
 Here is the list of parts we are using for our project.
 - Beaglebone Black rev C (https://beagleboard.org/black)
