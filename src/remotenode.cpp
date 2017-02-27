@@ -21,6 +21,9 @@ remotenode::remotenode(std::vector<unsigned char> nd_payload) {
 
 	i += 1;
 
+	//something like this?
+	this->rssi = nd_payload[i];
+	
 	this->name = "";
 	for (; i < nd_payload.size(); i++) {
 		this->name += char(nd_payload[i]);
@@ -28,6 +31,6 @@ remotenode::remotenode(std::vector<unsigned char> nd_payload) {
 
 	/* find how to extract RSSI from nd_payload, this might work since it is
 	 * essentially how it was done in the C implementation... */
-	this->rssi = std::stoi(this->name); 	
+	//this->rssi = std::stoi(this->name); 	
 
 }
