@@ -36,7 +36,7 @@ target_link_libraries(atcon remotenode)
 add_library(Observer src/Observer.cpp)
 target_link_libraries(Observer remotenode)
 target_link_libraries(Observer atcon)
-
+target_link_libraries(Observer BlackLib)
 
 # Add slamLib library, link with BlackLib and libxbee
 # add_library(slamLib src/slamLib.cpp)
