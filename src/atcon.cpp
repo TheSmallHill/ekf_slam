@@ -24,6 +24,13 @@ void atcon::xbee_conCallback(libxbee::Pkt **pkt) {
 		return;
 	}
 
+	//print entire packet
+	for (int i = 0; i < (*pkt)->size(); i++) {
+		//std::cout << (**pkt)[i];
+		printf("%02x ", (**pkt)[i]);
+	}
+	std::cout << "\n";
+	
 	std::vector<unsigned char> data = (*pkt)->getVector(); 
 
 	if (data.size() == 0) {	
