@@ -21,7 +21,7 @@ information on what this means for you, please see LICENSE.
 
 ## Installation
 This project is being written for the use of a Beaglebone Black running Ubuntu 16.04 LTS
-(available in the Linux directory) and ROS kinetic. Make sure to install ROS kinetic 
+(available at https://rcn-ee.net/) and ROS kinetic. Make sure to install ROS kinetic 
 according to the installation instructions on http://www.ros.org/ before downloading 
 and installing this package. To install the package, clone or download this repository
 into the top level source directory of your ROS workspace.
