@@ -83,7 +83,7 @@ for(row = obsArray.begin(); row != obsArray.end(); row++){
 
 		}
 
-		std::cout << "| ID: " << col->name << " RSSI: " << col->rssi;
+		std::cout << "| ID: " << col->name << "| RSSI: " << std::hex << col->rssi;
 
 	}
 

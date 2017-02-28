@@ -19,10 +19,10 @@ remotenode::remotenode(std::vector<unsigned char> nd_payload) {
 	this->addr64 = ((this->addr64 << 8) & ~0xFF) | (nd_payload[i + 7] & 0xFF);
 	i += 8;
 
-	i += 1;
-
 	//something like this?
-	this->rssi = nd_payload[i];
+	this->rssi = nd_payload[i] & 0xFF;
+	
+	i += 1;
 	
 	this->name = "";
 	for (; i < nd_payload.size(); i++) {
