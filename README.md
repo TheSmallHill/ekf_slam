@@ -38,6 +38,8 @@ Here are links to both repositories that I have forked for this project:
 - https://github.com/attie/libxbee3
 - https://github.com/yigityuce/BlackLib
 
+NOTE: Since the Eigen library is included in ROS (since Electric), the Eigen library is not included as a submodule in this repository. The CMakeLists.txt adds the library from ROS instead.
+
 ## Building
 In order to build the package, it is advised to use the combination of cmake and catkin tools
 provided with ROS kinetic. In the root directory of your ROS workspace, use this command to build
