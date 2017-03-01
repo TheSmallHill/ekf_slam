@@ -11,8 +11,15 @@ set (BlackLib lib/BlackLib/v3_0)
 
 ## Find catkin and any catkin packages
 find_package(catkin REQUIRED COMPONENTS roscpp std_msgs)
+find_package(cmake_modules REQUIRED)
+find_package(Eigen3 REQUIRED)
 
-catkin_package()
+catkin_package(DEPENDS Eigen3)
+
+
+#include_directories(
+#	${Eigen3_INCLUDE_DIRS}
+#)
 
 # Include directories
 include_directories(include)
@@ -36,7 +43,10 @@ target_link_libraries(atcon remotenode)
 add_library(Observer src/Observer.cpp)
 target_link_libraries(Observer remotenode)
 target_link_libraries(Observer atcon)
+target_link_libraries(Observer BlackLib)
 
+add_library(Slam src/Slam.cpp)
+target_link_libraries(Slam ${Eigen3_LIBRARIES})
 
 # Add slamLib library, link with BlackLib and libxbee
 # add_library(slamLib src/slamLib.cpp)
@@ -61,3 +71,4 @@ target_link_libraries(slamExperiment Observer)
 # target_link_libraries(slamExperiment remotenode)
 # target_link_libraries(slamExperiment Motor)
 target_link_libraries(slamExperiment Observer)
+target_link_libraries(slamExperiment Slam)
