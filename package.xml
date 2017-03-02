@@ -40,8 +40,14 @@
   <!--   <run_depend>message_runtime</run_depend> -->
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
+  <!-- For custom messages -->
+  <build_depend>message_generation</build_depend>
+  <run_depend>message_runtime</run_depend>
+  
+  <!-- For external libraries -->
   <build_depend>BlackLib</build_depend>
   <run_depend>libxbee3</run_depend>
+  
   <buildtool_depend>catkin</buildtool_depend>
 
 
