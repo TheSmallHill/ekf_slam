@@ -1,0 +1,6 @@
+Header header
+String rowUnit
+String colUnit
+Float32MultiArray data
+Float32MultiArray rowLabels
+Float32MultiArray colLabels
