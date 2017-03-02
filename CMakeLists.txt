@@ -10,9 +10,25 @@ endif()
 set (BlackLib lib/BlackLib/v3_0)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs)
+find_package(catkin REQUIRED COMPONENTS 
+	roscpp 
+	std_msgs
+	message_generation
+	)
 
-catkin_package()
+catkin_package(
+	CATKIN_DEPENDS message_runtime
+	)
+
+add_message_files(
+  FILES
+  RadioScan.msg
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 # Include directories
 include_directories(include)
@@ -38,26 +54,24 @@ target_link_libraries(Observer remotenode)
 target_link_libraries(Observer atcon)
 target_link_libraries(Observer BlackLib)
 
-# Add slamLib library, link with BlackLib and libxbee
-# add_library(slamLib src/slamLib.cpp)
-# target_link_libraries(slamLib BlackLib xbee)
+# Make matlab interface executable
+add_executable(matlabInterface interfaces/matlab/main.cpp)
+target_link_libraries(matlabInterface Motor)
+target_link_libraries(matlabInterface BlackLib)
+# target_link_libraries(matlabInterface remotenode)
+# target_link_libraries(matlabInterface atcon)
+target_link_libraries(matlabInterface Observer)
 
-# Make executable
+# Make other executable
 add_executable(slamExperiment src/main.cpp)
 
 # Link libraries to executable
 target_link_libraries(slamExperiment ${catkin_LIBRARIES})
-target_link_libraries(slamExperiment atcon)
+#target_link_libraries(slamExperiment atcon)
 
 # More linking
-# target_link_libraries(slamExperiment slamLib)
 target_link_libraries(slamExperiment Motor)
 target_link_libraries(slamExperiment BlackLib)
-target_link_libraries(slamExperiment remotenode)
-target_link_libraries(slamExperiment atcon)
-target_link_libraries(slamExperiment Observer)
-
-# target_link_libraries(slamExperiment xbee)
 # target_link_libraries(slamExperiment remotenode)
-# target_link_libraries(slamExperiment Motor)
+# target_link_libraries(slamExperiment atcon)
 target_link_libraries(slamExperiment Observer)
