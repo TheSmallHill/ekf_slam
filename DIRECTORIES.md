@@ -17,8 +17,12 @@ This is a list of the directories in this repository with a description of the f
 
 ## launch
 - node.launch - roslaunch file for starting the node created from main.cpp
+- matlabInterface.launch
 
-## interfaces (To be added soon)
+## interfaces 
+### matlab
+- main.cpp
+- ekfSlam.m
 
 ## lib
 - libxbee3
