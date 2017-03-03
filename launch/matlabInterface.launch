@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="ekf_slam" name="matlabInterface" type="matlabInterface" output="screen" launch-prefix="sudo">
+	</node>
+</launch>
