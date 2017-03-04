@@ -26,7 +26,7 @@
 
 /* include files for ROS */
 #include "ros/ros.h"
-#include "std_msgs/
+#include "ekf_slam/RadioScan.h"
 
 /* Define pins for Motor object */	
   BlackLib::BlackGPIO step(BlackLib::GPIO_30, BlackLib::output, BlackLib::FastMode);
