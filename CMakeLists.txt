@@ -23,6 +23,8 @@ catkin_package(
 add_message_files(
   FILES
   RadioScan.msg
+  RadioObservation.msg
+  RadioResponse.msg
 )
 
 generate_messages(
