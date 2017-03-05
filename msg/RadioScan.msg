@@ -1,6 +1,5 @@
-Header header
-String rowUnit
-String colUnit
-Float32MultiArray data
-Float32MultiArray rowLabels
-Float32MultiArray colLabels
+header header
+float32 angle_min
+float32 angle_max
+float32 angle_increment
+radioObservation[] observations

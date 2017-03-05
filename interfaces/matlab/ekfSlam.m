@@ -23,6 +23,27 @@ clear
 close all
 clc
 
-% code to run ekf-slam on Pioneer via ROS
+%% Connect to ROS 
+rosCoreIP = '192.168.1.3';
+rosNodeName = 'ekfSlamControl';
+node = robotics.ros.Node(rosNodeName,rosCoreIP);
+
+%% Create publishers and subscribers
+observeRequestPub = robotics.ros.Publisher(node, 'observeRequest','std_msgs/Bool');
+observeResponseSub = robotics.ros.Subscriber(node, 'observeResponse', 'xbee_scanner/RadioScan');
+
+% temporary variables
+observe_msg = rosmessage(observeResponseSub);
+observe_req = rosmessage(observeRequestPub);
+
+% send a request...
+observe_req.data = true;
+send(observeRequestPub, observe_req);
+
+%...and wait for the response
+observe_msg = receive(observe_msg);
+
+% set a breakpoint here so we can read the data
+breakpoint = 1;
 
 end

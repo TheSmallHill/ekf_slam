@@ -51,7 +51,7 @@
   Observer *xbee = new Observer();
 
 /* this callback will happen every time you publish to its associated topic */
-void observationRequestCB(const std_msgs::Bool msg) {
+void observeRequestCB(const std_msgs::Bool msg) {
  //make a ros temp variable for data
   
  //do a full set of observations (using a while loop) and save data
@@ -96,11 +96,11 @@ int main(int argc, char **argv) {
   ros::NodeHandle thisNode;
   
   // publishers and subscribers
-  ros::Subscriber observationRequest = thisNode.subscribe("observerNode", 1000, observationRequestCB);
-  ros::Publisher observationResponse = thisNode.advertise<RadioScan>("observation", 50);
+  ros::Subscriber observeRequest = thisNode.subscribe("observeRequest", 1000, observeRequestCB);
+  ros::Publisher observeResponse = thisNode.advertise<RadioScan>("observeResponse", 50);
  
   // start doing things
-  ros::Spin();
+  ros::spin();
  
   return(0);
 }
