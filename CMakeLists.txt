@@ -53,27 +53,14 @@ target_link_libraries(atcon remotenode)
 
 add_library(Observer src/Observer.cpp)
 target_link_libraries(Observer remotenode atcon BlackLib)
-#target_link_libraries(Observer atcon)
-#target_link_libraries(Observer BlackLib)
 
 # Make matlab interface executable
 add_executable(matlabInterface interfaces/matlab/main.cpp)
 target_link_libraries(matlabInterface Motor BlackLib remotenode atcon Observer)
-#target_link_libraries(matlabInterface BlackLib)
-# target_link_libraries(matlabInterface remotenode)
-# target_link_libraries(matlabInterface atcon)
-#target_link_libraries(matlabInterface Observer)
+add_dependencies(matlabInterface ${catkin_LIBRARIES}) # I think this the correct dependency, but verify
 
 # Make other executable
 add_executable(slamExperiment src/main.cpp)
 
-# Link libraries to executable
+# Link libraries to executable slamExperiment
 target_link_libraries(slamExperiment ${catkin_LIBRARIES} atcon Motor BlackLib remotenode atcon Observer)
-#target_link_libraries(slamExperiment atcon)
-
-# More linking
-#target_link_libraries(slamExperiment Motor)
-#target_link_libraries(slamExperiment BlackLib)
-# target_link_libraries(slamExperiment remotenode)
-# target_link_libraries(slamExperiment atcon)
-#target_link_libraries(slamExperiment Observer)
