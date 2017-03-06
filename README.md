@@ -59,16 +59,12 @@ root directory of your ROS workspace:
 
   $ roslaunch ekf_slam node.launch
   
-Although there are no current plans to convert this node to a ROS package for use on other
-platforms, it is possible that this may be done after the completion of this project.
+There is also a C++ node written so the package can be controlled from a remote computer. The current use is with Matlab, hence the name matlabInterface. Of course, this node could be interfaced with using any language supported by ROS. To run this node, use this command in the root directory of your ROS workspace:
+  
+  $ roslaunch ekf_slam matlabInterface.launch
 
 ## Interfaces
-Right now the package is written in a way so you must add changes to main.cpp and recompile in order
-to make changes to the program. However, due to the way ROS works, it is possible to add control of
-the operation of the package from another language over a network (such as MATLAB using the 
-Robotics System Toolbox). If (and when) these interfaces are created, the source for the executable
-will be added to the Interfaces directory of this repository. A new launch file for the 
-associated executable will also most likely be added to the launch directory.
+This directory contains subdirectories for the different interfaces that have been written. Currently the only interface included is the Matlab interface.
 
 ## Future work
 Although not currently necessary, I may add CMakeLists.txt to libxbee3 so it can be built
