@@ -45,7 +45,7 @@ public:
  		M1 = new Motor(stepPin, directionPin, ms1Pin, ms2Pin, ms3Pin);
 
 		/* Set some of the parameters */
-		M1->pos=-180;
+		M1->pos = -180;
  	 	M1->posMax = 180;
   		M1->posMin = -180;
   		M1->direction = 0;
