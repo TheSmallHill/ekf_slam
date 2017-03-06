@@ -23,27 +23,41 @@ clear
 close all
 clc
 
-%% Connect to ROS 
+pause('on')
+
+cleanupObj = onCleanup(@cleanMeUp);
+
+%% Connect to ROS
+setenv('ROS_MASTER_URI', 'http://192.168.1.3:11311')
+setenv('ROS_IP','192.168.1.124');
 rosCoreIP = '192.168.1.3';
+rosinit;
 rosNodeName = 'ekfSlamControl';
 node = robotics.ros.Node(rosNodeName,rosCoreIP);
 
 %% Create publishers and subscribers
 observeRequestPub = robotics.ros.Publisher(node, 'observeRequest','std_msgs/Bool');
-observeResponseSub = robotics.ros.Subscriber(node, 'observeResponse', 'xbee_scanner/RadioScan');
+observeResponseSub = robotics.ros.Subscriber(node, 'observeResponse', 'ekf_slam/RadioScan');
 
 % temporary variables
 observe_msg = rosmessage(observeResponseSub);
 observe_req = rosmessage(observeRequestPub);
 
 % send a request...
-observe_req.data = true;
+observe_req.Data = true;
 send(observeRequestPub, observe_req);
 
 %...and wait for the response
-observe_msg = receive(observe_msg);
+observe_msg = receive(observeResponseSub);
 
 % set a breakpoint here so we can read the data
 breakpoint = 1;
+
+end
+
+function cleanMeUp()
+
+rosshutdown;
+disp('Cleanup successful');
 
 end
