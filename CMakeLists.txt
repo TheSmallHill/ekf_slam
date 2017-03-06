@@ -21,10 +21,8 @@ catkin_package(
 	)
 
 add_message_files(
-  FILES
-  RadioScan.msg
-  RadioObservation.msg
-  RadioResponse.msg
+  DIRECTORY msg
+  FILES RadioScan.msg RadioObservation.msg RadioResponse.msg
 )
 
 generate_messages(
@@ -57,7 +55,7 @@ target_link_libraries(Observer remotenode atcon BlackLib)
 # Make matlab interface executable
 add_executable(matlabInterface interfaces/matlab/main.cpp)
 target_link_libraries(matlabInterface Motor BlackLib remotenode atcon Observer)
-add_dependencies(matlabInterface ${catkin_LIBRARIES}) # I think this the correct dependency, but verify
+add_dependencies(matlabInterface ${ekf_slam_EXPORTED_TARGETS}) # to ensure messages build before executable
 
 # Make other executable
 add_executable(slamExperiment src/main.cpp)
