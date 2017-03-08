@@ -44,25 +44,26 @@ class rosMatlab
 {
 	public:
 	/* Constructor */
-	rosMatlab(BlackLib::BlackGPIO* stepPin, BlackLib::BlackGPIO* directionPin, BlackLib::BlackGPIO* ms1Pin, BlackLib::BlackGPIO* ms2Pin, BlackLib::BlackGPIO* ms3Pin) : stepPin(*stepPin), directionPin(*directionPin), ms1Pin(*ms1Pin), ms2Pin(*ms2Pin), ms3Pin(*ms3Pin)
+	//rosMatlab(BlackLib::BlackGPIO* stepPin, BlackLib::BlackGPIO* directionPin, BlackLib::BlackGPIO* ms1Pin, BlackLib::BlackGPIO* ms2Pin, BlackLib::BlackGPIO* ms3Pin) : stepPin(*stepPin), directionPin(*directionPin), ms1Pin(*ms1Pin), ms2Pin(*ms2Pin), ms3Pin(*ms3Pin)
+	rosMatlab(Motor* M1, Observer* xbee) : M1(*M1), xbee(*xbee)
 	{
 
 		 /* Create Motor object */
- 		M1 = new Motor(stepPin, directionPin, ms1Pin, ms2Pin, ms3Pin);
+ 		//M1 = new Motor(stepPin, directionPin, ms1Pin, ms2Pin, ms3Pin);
 
-		ROS_INFO("Motor object created");
+		//ROS_INFO("Motor object created");
 
-		M1->pos=-180;
- 		M1->posMax = 180;
-  		M1->posMin = -180;
-  		M1->direction = 0;
-  		M1->ms[0] = 0;
-  		M1->ms[1] = 0;
-  		M1->ms[2] = 0;
+		//M1->pos=-180;
+ 		//M1->posMax = 180;
+  		//M1->posMin = -180;
+  		//M1->direction = 0;
+  		//M1->ms[0] = 0;
+  		//M1->ms[1] = 0;
+  		//M1->ms[2] = 0;
 
 		/* Create Observer object */		
-		xbee = new Observer();
-		ROS_INFO("Observer object created");
+		//xbee = new Observer();
+		//ROS_INFO("Observer object created");
 
 		/* ROS publishers and subscribers */
 		observationResponse = thisNode.advertise<ekf_slam::RadioScan>("observeResponse",1);
@@ -73,11 +74,11 @@ class rosMatlab
 	}
 
 	/* Destructor */	
-	~rosMatlab(){
-		ROS_INFO("destructed objects");
-		delete M1;
-		delete xbee;
-	}
+	//~rosMatlab(){
+		//ROS_INFO("destructed objects");
+		//delete M1;
+		//delete xbee;
+	//}
 
 	/* Shutdown callback, to shutdown from remote node*/
 	void shutdownRequestCB(const std_msgs::Bool& msg) {
@@ -135,10 +136,14 @@ class rosMatlab
 		ROS_INFO("sending");
 		observationResponse.publish(dataSet);
 		ROS_INFO("sent");
-
-
 	}
 
+	void spin() {
+	
+		ros::spin();
+	
+	}
+	
 	private:
 		ros::NodeHandle thisNode;
 		ros::Publisher observationResponse;
@@ -149,35 +154,39 @@ class rosMatlab
         	BlackLib::BlackGPIO& ms1Pin;
         	BlackLib::BlackGPIO& ms2Pin;
         	BlackLib::BlackGPIO& ms3Pin;
-		Motor *M1;
-		Observer *xbee;
+		//Motor *M1;
+		//Observer *xbee;
 
 };
 
 int main(int argc, char** argv) {
 
-{
+{ // open a scope within main
 
  	// initialize the ros node
   	ros::init(argc, argv, "observerNode");
 
 	ROS_INFO("ROS initialized");
 
-	/* Blacklib pins */
+	/* Create motor object to pass */
 	BlackLib::BlackGPIO step(BlackLib::GPIO_30, BlackLib::output, BlackLib::FastMode);
 	BlackLib::BlackGPIO direc(BlackLib::GPIO_31, BlackLib::output, BlackLib::FastMode);
 	BlackLib::BlackGPIO ms1(BlackLib::GPIO_39,BlackLib::output,BlackLib::FastMode);
 	BlackLib::BlackGPIO ms2(BlackLib::GPIO_35,BlackLib::output,BlackLib::FastMode);
 	BlackLib::BlackGPIO ms3(BlackLib::GPIO_67,BlackLib::output,BlackLib::FastMode);
+	Motor *M1 = new M1(&step, &direc, &ms1, &ms2, &ms3);
+	
+	/* Create observer object to pass */
+	Observer *xbee = new Observer();
 	
 	/* start ROS node */
-	rosMatlab RMobject(&step, &direc, &ms1, &ms2, &ms3);
+	rosMatlab RMobject(M1, xbee);
 	ROS_INFO("Node started successfully");
 
 	/* start spinning threads */
-	ros::spin();
+	RMobject->spin();
 
-} // all objects out of scope
+} // all objects out of scope after this (destructors called and memory freed)
 
 std::cout << "Destruction complete" << std::endl;
 return(0);
