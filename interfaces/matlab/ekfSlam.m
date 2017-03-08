@@ -26,18 +26,15 @@ clear
 close all
 clc
 
-pause('on');
+pause('on')
 
 cleanupObj = onCleanup(@cleanMeUp);
 
-%% ROS setup
-% make sure environment is correct
+%% Connect to ROS
 setenv('ROS_MASTER_URI', 'http://192.168.1.3:11311')
-setenv('ROS_IP', '192.168.1.124');
-rosinit;
-
-% local node
+setenv('ROS_IP','192.168.1.124');
 rosCoreIP = '192.168.1.3';
+rosinit;
 rosNodeName = 'ekfSlamControl';
 node = robotics.ros.Node(rosNodeName,rosCoreIP);
 
@@ -784,12 +781,33 @@ for k=1:maxk
 %  y=radm*cos(the)*si+co*radn*sin(the)+ypos;
   h(k) = line(radm*cos(the)*co-si*radn*sin(the)+xpos,radm*cos(the)*si+co*radn*sin(the)+ypos);
   set(h(k),'color',C(rem(k-1,size(C,1))+1,:));
+=======
+%% Create publishers and subscribers
+observeRequestPub = robotics.ros.Publisher(node, 'observeRequest','std_msgs/Bool');
+observeResponseSub = robotics.ros.Subscriber(node, 'observeResponse', 'ekf_slam/RadioScan');
+>>>>>>> origin/ros-matlab-1
 
 end
 
+<<<<<<< HEAD
 end
 
 % cleanup function
+function cleanMeUp()
+=======
+% send a request...
+observe_req.Data = true;
+send(observeRequestPub, observe_req);
+
+%...and wait for the response
+observe_msg = receive(observeResponseSub);
+>>>>>>> origin/ros-matlab-1
+
+rosshutdown;
+disp('Cleanup successful');
+
+end
+
 function cleanMeUp()
 
 rosshutdown;
