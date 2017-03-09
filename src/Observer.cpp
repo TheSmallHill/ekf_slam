@@ -14,7 +14,7 @@
 #define BAUDRATE 9600
 
 /* observer object constructor */
-Observer::Observer()
+Observer::Observer() // @TODO add parameters such as UART, baudrate, and serial port
 {
   	/* start uart using BlackLib, specified by constructor arguments */
 	// may have to change tty port used in BlackLib::BlackUART (currently ttyO#, should be ttyS#)
