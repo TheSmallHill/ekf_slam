@@ -16,19 +16,19 @@
 /* observer object constructor */
 Observer::Observer()
 {
-  	//start uart using BlackLib, specified by constructor arguments
-	//uart = new BlackLib::BlackUART(BlackLib::UART2, BlackLib::Baud9600, BlackLib::ParityEven, BlackLib::StopOne, BlackLib::Char8);	
-		
-	//bool isOpened = uart->open(BlackLib::ReadWrite | BlackLib::NonBlock);
+  	/* start uart using BlackLib, specified by constructor arguments */
+	// may have to change tty port used in BlackLib::BlackUART (currently ttyO#, should be ttyS#)
+	uart = new BlackLib::BlackUART(BlackLib::UART2, BlackLib::Baud9600, BlackLib::ParityEven, BlackLib::StopOne, BlackLib::Char8);			
+	bool isOpened = uart->open(BlackLib::ReadWrite | BlackLib::NonBlock);
 
-    	//if(!isOpened)
-    	//{
-        //	std::cout << "UART DEVICE CAN\'T OPEN.;" << std::endl;
-        //	exit(1);
-    	//}
+    	if(!isOpened)
+    	{
+        	std::cout << "UART DEVICE CAN\'T OPEN.;" << std::endl;
+        	exit(1);
+    	}
 
   	/* have some of these arguments passed to constructor */
-	xbee = new libxbee::XBee("xbee2", "dev/ttyS1", BAUDRATE);	
+	xbee = new libxbee::XBee("xbee2", "/dev/ttyS2", BAUDRATE);	
 	std::cout << "xbee connected" << std::endl;
 	con = new atcon(*xbee, "Local AT");	
 	std::cout << "new connection made" << std::endl;
@@ -44,8 +44,10 @@ Observer::~Observer()
 {
 
   	/* delete objects and arrays created by constructor */
+	delete con;
 	delete xbee;
-	//delete uart;
+	uart->close(); //close connection before deleting
+	delete uart;
     	//delete observedData;
 
 }
