@@ -69,9 +69,3 @@ the operation of the package from another language over a network (such as MATLA
 Robotics System Toolbox). If (and when) these interfaces are created, the source for the executable
 will be added to the Interfaces directory of this repository. A new launch file for the 
 associated executable will also most likely be added to the launch directory.
-
-## Future work
-Although not currently necessary, I may add CMakeLists.txt to libxbee3 so it can be built
-and installed using cmake. This would make building and installation much simpler. I may also
-continue adding CMakeLists.txt to the BlackLib library so it will build the library in its
-entirety.
