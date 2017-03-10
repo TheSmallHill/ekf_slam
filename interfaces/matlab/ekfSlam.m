@@ -251,7 +251,7 @@ while(1)
         observe_msg = receive(observeResponse_sub);
         
         % find range and bearing for each beacon (process, reorganize, convert to meters)
-        
+        z = processObservations(observe_msg, ETA, P_REF);
         
         % direct data associate
         [zf, idf, zn, da_table] = data_associate_known(q, z, ftag_temp, da_table);
@@ -781,35 +781,76 @@ for k=1:maxk
 %  y=radm*cos(the)*si+co*radn*sin(the)+ypos;
   h(k) = line(radm*cos(the)*co-si*radn*sin(the)+xpos,radm*cos(the)*si+co*radn*sin(the)+ypos);
   set(h(k),'color',C(rem(k-1,size(C,1))+1,:));
-=======
-%% Create publishers and subscribers
-observeRequestPub = robotics.ros.Publisher(node, 'observeRequest','std_msgs/Bool');
-observeResponseSub = robotics.ros.Subscriber(node, 'observeResponse', 'ekf_slam/RadioScan');
->>>>>>> origin/ros-matlab-1
+
+end
+end
+
+function z = processObservations(observe_msg, eta, ref)
+
+    total_beacons = 0;
+for i = 1:size(observe_msg.Observations,1) % through the rows
+       
+       if size(observe_msg.Observations(i).Observation,1) > total_beacons
+           total_beacons = size(observe_msg.Observations(i).Observation,1);
+       end                 
+end
+
+for i = 1:size(observe_msg.Observations,1)
+    data{i} = NaN*ones(2,1);
+end
+
+for i = 1:size(observe_msg.Observations,1) % through the rows
+    
+    % go through beacons in each row
+    for j=1:size(observe_msg.Observations(i).Observation,1)
+       
+       
+       [~,temp] = strtok(observe_msg.Observations(i).Observation(j).Name, 'n');
+       temp = str2double(temp(2:end));
+       
+       % cell array, each row is an angle, beacon number is index of rssi
+       % data
+       data{i}(temp) = observe_msg.Observations(i).Observation(j).Rssi;
+            
+    end
+        
+end
+
+for k = 1:total_beacons
+max = Inf;
+idx = 0;
+    for i=1:size(data,2)
+   
+        if data{i}(k) < max
+        
+            max = data{i}(k);
+            idx = i;
+            
+        end
+        
+    end
+    
+    z(1,k) = max;
+    z(2,k) = observe_msg.Observations(idx).Angle;
+    
+    z = rssi2distance(z, eta, ref);
+    
+end
 
 end
 
-<<<<<<< HEAD
+function z = rssi2distance(z, eta, ref)
+
+for i = 1:size(z,2)
+   
+    z(1,i) = 10^((abs(z(1,i)) - abs(ref))/(10*eta));
+    
+end
+
 end
 
 % cleanup function
 function cleanMeUp()
-=======
-% send a request...
-observe_req.Data = true;
-send(observeRequestPub, observe_req);
-
-%...and wait for the response
-observe_msg = receive(observeResponseSub);
->>>>>>> origin/ros-matlab-1
-
-rosshutdown;
-disp('Cleanup successful');
-
-end
-
-function cleanMeUp()
-
 rosshutdown;
 disp('Cleanup successful');
 
