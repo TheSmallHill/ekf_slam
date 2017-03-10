@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 #include <list>
 #include <iomanip>
 #include <iostream>
@@ -39,18 +40,21 @@
 #include <ekf_slam/RadioScan.h>
 #include <ekf_slam/RadioObservation.h>
 #include <ekf_slam/RadioResponse.h>
+#include <ros/xmlrpc_manager.h>
 
 class rosMatlab
 {
 	public:
-	/* Constructor */
 	rosMatlab(BlackLib::BlackGPIO* stepPin, BlackLib::BlackGPIO* directionPin, BlackLib::BlackGPIO* ms1Pin, BlackLib::BlackGPIO* ms2Pin, BlackLib::BlackGPIO* ms3Pin) : stepPin(*stepPin), directionPin(*directionPin), ms1Pin(*ms1Pin), ms2Pin(*ms2Pin), ms3Pin(*ms3Pin)
 	{
+
+		ROS_INFO("constructor");
+ 		
 
 		 /* Create Motor object */
  		M1 = new Motor(stepPin, directionPin, ms1Pin, ms2Pin, ms3Pin);
 
-		ROS_INFO("Motor object created");
+		ROS_INFO("motor");
 
 		M1->pos=-180;
  		M1->posMax = 180;
@@ -60,29 +64,28 @@ class rosMatlab
   		M1->ms[1] = 0;
   		M1->ms[2] = 0;
 
-		/* Create Observer object */		
+		ROS_INFO("xbee setup");
 		xbee = new Observer();
-		ROS_INFO("Observer object created");
 
-		/* ROS publishers and subscribers */
+		ROS_INFO("initialization");
+
 		observationResponse = thisNode.advertise<ekf_slam::RadioScan>("observeResponse",1);
 		observationRequest = thisNode.subscribe("observeRequest", 1, &rosMatlab::observationRequestCB, this);
 		shutdownRequest = thisNode.subscribe("shutdownRequest", 1, &rosMatlab::shutdownRequestCB, this);
-		ROS_INFO("Publisher and subscribers created");
+
+		ROS_INFO("publisher and subscribers");
 
 	}
-
-	/* Destructor */	
 	~rosMatlab(){
 		ROS_INFO("destructed objects");
 		delete M1;
 		delete xbee;
 	}
 
-	/* Shutdown callback, to shutdown from remote node*/
 	void shutdownRequestCB(const std_msgs::Bool& msg) {
 
 		ROS_INFO("Shutdown request received, shutting down");
+	
 		ros::shutdown();
 
 	}
@@ -90,27 +93,44 @@ class rosMatlab
 	void observationRequestCB(const std_msgs::Bool& msg) {
 
 		ROS_INFO("callback start");
- 		ekf_slam::RadioScan dataSet;
+ 		
+		ekf_slam::RadioScan dataSet;
 		ekf_slam::RadioResponse packet;
 		ekf_slam::RadioObservation measurement;
-		//double tempData[40][4];
+		
 		std::vector<obs> obsRow;
 		std::vector<std::vector<obs>> obsArray;
+		
 		dataSet.angle_min = 0;
 		dataSet.angle_max = 360;
-		dataSet.angle_increment = 9; 
+		dataSet.angle_increment = 9;
+		
+		int rowInfo[41];
+		int maxRowInfo = 0;
 
 		 //do a full set of observations (using a while loop) and save data
 		for (int i = 0; i < 41; i++) {
 			obsRow = xbee->doObservation(9*i);
+			rowInfo[i] = obsRow.size();
 			obsArray.push_back(obsRow);
 			ROS_INFO("incrementing motor");
 	        	M1->incrementMotor(80);
 
-			if(M1->getAng() >= 180) break;
+			if(rowInfo[i] > maxRowInfo){
+				maxRowInfo = rowInfo[i];
+			}
+			
+			ekf_slam::RadioObservation measurement;
+			std::vector<obs>::iterator iter;
+			measurement.angle = i*9;
+			for(iter =obsRow.begin(); iter !=obsRow.end();iter++){
+				packet.name = iter->name;
+				packet.rssi = iter->rssi;
+				measurement.observation.push_back(packet);
+			}
+			dataSet.observations.push_back(measurement);
 		}
 
-		/* @TODO fix copying issues so data is actually transferred */
 		std::vector<std::vector<obs>>::iterator row;
 		std::vector<obs>::iterator col;
 		int angleCount = 0;
@@ -118,18 +138,12 @@ class rosMatlab
 			for(col = row->begin(); col!=row->end(); col++){
 				if(col == row->begin()){
 					std::cout << "| Angle = " << angleCount;
-					measurement.angle = angleCount;
 					angleCount = angleCount + 9;
 				}
 				std::cout << "| ID = " << col->name << "| RSSI = " << std::dec << col->rssi;
-				ekf_slam::RadioResponse packet;
-				packet.name = col->name;
-				packet.rssi = col->rssi;
 
-				measurement.observation.push_back(packet);
 			}
 			std::cout << "" << std::endl;
-			dataSet.observations.push_back(measurement);
 		}
 
 		ROS_INFO("sending");
@@ -157,28 +171,28 @@ class rosMatlab
 int main(int argc, char** argv) {
 
 {
+	ROS_INFO("start of main\n");
 
- 	// initialize the ros node
+	// initialize the ros node
   	ros::init(argc, argv, "observerNode");
 
-	ROS_INFO("ROS initialized");
-
-	/* Blacklib pins */
+	ROS_INFO("ros::init done\n");
+  	
 	BlackLib::BlackGPIO step(BlackLib::GPIO_30, BlackLib::output, BlackLib::FastMode);
 	BlackLib::BlackGPIO direc(BlackLib::GPIO_31, BlackLib::output, BlackLib::FastMode);
 	BlackLib::BlackGPIO ms1(BlackLib::GPIO_39,BlackLib::output,BlackLib::FastMode);
 	BlackLib::BlackGPIO ms2(BlackLib::GPIO_35,BlackLib::output,BlackLib::FastMode);
 	BlackLib::BlackGPIO ms3(BlackLib::GPIO_67,BlackLib::output,BlackLib::FastMode);
 	
-	/* start ROS node */
 	rosMatlab RMobject(&step, &direc, &ms1, &ms2, &ms3);
-	ROS_INFO("Node started successfully");
 
-	/* start spinning threads */
+	ROS_INFO("object created\n");
+
 	ros::spin();
 
 } // all objects out of scope
 
-std::cout << "Destruction complete" << std::endl;
+std::cout << "returning 0" << std::endl;
+
 return(0);
 }
