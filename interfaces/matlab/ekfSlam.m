@@ -39,7 +39,7 @@ rosNodeName = 'ekfSlamControl';
 node = robotics.ros.Node(rosNodeName,rosCoreIP);
 
 % remote node
-robotName = 'Pioneer';
+robotName = 'RosAria';
 
 % Create publishers and subscribers
 % Estimation subsystem
@@ -49,6 +49,7 @@ observeResponse_sub = robotics.ros.Subscriber(node, 'observeResponse', 'ekf_slam
 % Pioneer
 pose_sub = robotics.ros.Subscriber(node, strcat('/', robotName, '/pose'), 'nav_msgs/Odometry');
 cmdVel_pub = robotics.ros.Publisher(node, strcat('/', robotName, '/cmd_vel'), 'geometry_msgs/Twist');
+setPose_pub = robotics.ros.Publisher(node, strcat('/', robotName, '/setpose'), 'nav_msgs/Odometry');
 
 % Temporary variables 
 % Estimation subsystem
@@ -59,9 +60,15 @@ observe_req = rosmessage(observeRequest_pub);
 pose = rosmessage(pose_sub);
 cmdVel = rosmessage(cmdVel_pub);
 
+% set pose before continuing
+pose.Pose.Pose.Position.X = 1.5;
+pose.Pose.Pose.Position.Y = 1;
+pose.Pose.Pose.Orientation.W = pi/2;
+send(setPose_pub, pose);
+
 %% Algorithm parameters
 % general
-numFeatures = 4;                                    % @TODO: make dynamic (no hardcoded values since number of landmarks is unknown
+numFeatures = 3;                                    % @TODO: make dynamic (no hardcoded values since number of landmarks is unknown)
 
 % timing
 T = .25;                                            % [sec], time step
@@ -74,11 +81,11 @@ da_table = zeros(1,numFeatures);                    % data association table
 % navigation
 wp_idx = 1;                                         % waypoint index
 wpIsFinal = false;                                  % set if at final waypoint 
-wp = [1.5, 2.5;                                     % [m], x-coordinates of waypoints
-      1.5, 3];                                      % [m], y-coordinates of waypoints
+wp = [1.5;                                          % [m], x-coordinates of waypoints
+      2];                                         % [m], y-coordinates of waypoints
 
 % control
-V = .2;                                             % [m/s], constant linear velocity, @TODO: convert to fuzzy logic
+V = 0;                                              % [m/s], constant linear velocity, @TODO: convert to fuzzy logic
 G = 0;                                              % [rad], initial steering angle
 G_MAX = deg2rad(180);                               % [rad], max steering angle
 
@@ -91,17 +98,17 @@ TRACK = .381;                                       % [m], distance between whee
 ENCODER_TICKS = 500;                                % number of encoder ticks
 
 % observation
-DT_OBSERVE = 8*T;                                   % [sec], time between observations
+DT_OBSERVE = 50*T;                                 % [sec], time between observations
 obs_idx = 0;                                        % index for counting obervations
 
 % rssi to distance
 ETA = 2;                                            % propogation constant
-P_REF = -35;                                        % [dBm], reference power level
+P_REF = -29;                                        % [dBm], reference power level
 
 %% Algorithm setup
 pose = receive(pose_sub);                           % robot's initial pose, measured by robot
 q = [pose.Pose.Pose.Position.X; pose.Pose.Pose.Position.Y; pi_to_pi(pose.Pose.Pose.Orientation.W)];
-qTrue = [0; 0; pi_to_pi(0)];                        % [m, m, rad], estimate of initial pose
+qTrue = [1.5; 1; pi_to_pi(pi/2)];                        % [m, m, rad], estimate of initial pose
 
 Pcov = diag((qTrue-q(1:3)).^2);                     % initial state covariance matrix
 
@@ -114,14 +121,14 @@ Q = diag([SIGMA_V^2 SIGMA_W^2]);                    % process noise covariance m
 
 % observation noise, @TODO make dynamic or calculate based on prior data
 SIGMA_R = 2;                                        % standard deviation of range measurement
-SIGMA_B = deg2rad(25);                              % standard deviation of bearing measurement
+SIGMA_B = deg2rad(18);                              % standard deviation of bearing measurement
 
 R = diag([SIGMA_R^2 SIGMA_B^2]);                    % observation noise covariance matrix
 
 % other
 AT_WAYPOINT = .25;                                  % [m], threshold for robot to be considered as arrived at waypoint
 i = 1;                                              % starting at first iteration
-i_max = 2e3;                                        % max number of iteration
+i_max = 1e3;                                        % max number of iteration
 
 %% data saving
 qTrueDT(:,i) = qTrue;
@@ -134,26 +141,28 @@ MINUTES = 1;                                        % Length of video in minutes
 VIDEO_LENGTH = 60*MINUTES;                          % Length of video in seconds
 vid = VideoWriter('OUT/trajectory.avi');            % Name of the video file
 vid.Quality = 100;                                  % all the quality
-vid.FrameRate = imax/VIDEO_LENGTH;                  % Frames per second needed for desired video length and max iterations
+vid.FrameRate = i_max/VIDEO_LENGTH;                  % Frames per second needed for desired video length and max iterations
 open(vid);                                          % Open the video for writing
+
+tic
 
 %% Algorithm running
 while(1)
     
-    % initial plotting
-    clf                                             % clear the current figure
-%     lmActual = plot(lm(1,:),lm(2,:),'b*'); % plot actual landmark locations, maybe unknown 
-    hold on 
-    wpActual = plot(wp(1,:),wp(2,:), 'gd-');        % plot the waypoints with lines in between to show the path
-    xlim([0 3]), ylim([0 3]);                       % Limit the size of the simulation plot
-    xlabel('X [m]'), ylabel('Y [m]');               % Label the axes
-    grid on
+%     % initial plotting
+%     clf                                             % clear the current figure
+% %     lmActual = plot(lm(1,:),lm(2,:),'b*'); % plot actual landmark locations, maybe unknown 
+%     hold on 
+%     wpActual = plot(wp(1,:),wp(2,:), 'gd-');        % plot the waypoints with lines in between to show the path
+%     xlim([-2 5]), ylim([-2 5]);                       % Limit the size of the simulation plot
+%     xlabel('X [m]'), ylabel('Y [m]');               % Label the axes
+%     grid on
     
     i = i + 1;
    
     % compute steering angle
     cwp = wp(:,wp_idx);
-    dist = sqrt((cwp(1) - q(1))^2 + (cwp(2)-q(2))^2);
+    dist = sqrt((cwp(1) - qTrue(1))^2 + (cwp(2)-qTrue(2))^2);
     if (dist^2 < AT_WAYPOINT^2)
         wp_idx = wp_idx + 1;
         if (wp_idx > size(wp,2))
@@ -164,13 +173,13 @@ while(1)
     end
    
     % change in steering angle
-    deltaG = pi_to_pi(atan2(cwp(2) - q(2), cwp(1)-q(1))-q(3)-G);
+    deltaG = pi_to_pi(atan2(cwp(2) - qTrue(2), cwp(1)-qTrue(1))-qTrue(3)-G);
 
     % limit steering rate
-    maxDelta = RATE_G*T;
-    if abs(deltaG) > maxDelta
-        deltaG = sign(deltaG)*maxDelta;
-    end
+%     maxDelta = RATE_G*T;
+%     if abs(deltaG) > maxDelta
+%         deltaG = sign(deltaG)*maxDelta;
+%     end
 
     % limit steering angle
     G = G + deltaG;
@@ -185,6 +194,7 @@ while(1)
     if wpIsFinal == true
         wp_idx = 1;
         wpIsFinal = false;
+        break;
     end
     
     % limit velocities
@@ -197,22 +207,41 @@ while(1)
      end
     
     % estimate noisy velocities using process noise covariance matrix
-    Vn = V + randn(1)*sqrt(Q(1,1));
-    Wn = W + randn(1)*sqrt(Q(2,2));
-
+    if (V ~= 0)
+        Vn = V + randn(1)*sqrt(Q(1,1));
+    else
+        Vn = V;
+    end
+    
+    if (W ~= 0)
+        Wn = W + randn(1)*sqrt(Q(2,2));
+    else
+        Wn = W;
+    end
+       
+%     if i > 1
+    if toc < T
+        pause(T-toc);
+    end
+%     end
     % send the command to the pioneer
     cmdVel.Linear.X = V;
     cmdVel.Angular.Z = W;
     send(cmdVel_pub, cmdVel);
-    pause(T);
-    
+%     pause(T);
+    tic
+
     % get the pose after moving for T seconds
     oldPose = q(1:3);
     pose = receive(pose_sub);
     q(1:3) = [pose.Pose.Pose.Position.X; pose.Pose.Pose.Position.Y; pi_to_pi(pose.Pose.Pose.Orientation.W)];
     
-    % estimate pose for the theoretical
-    
+    % estimate pose
+    if V ~= 0
+        qTrue(1:2) = qTrue(1:2) + Vn*T*((q(1:2) - oldPose(1:2))/norm(q(1:2) - oldPose(1:2)));
+    end
+        
+        
     % predict step
     s = sin(G + q(3));
     c = cos(G + q(3));
@@ -240,6 +269,8 @@ while(1)
     if dtsum >= DT_OBSERVE
         dtsum = 0;
         
+        pause(T-toc);
+        
         % stop pioneer for observations
         cmdVel.Linear.X = 0;
         cmdVel.Angular.Z = 0;
@@ -251,7 +282,7 @@ while(1)
         observe_msg = receive(observeResponse_sub);
         
         % find range and bearing for each beacon (process, reorganize, convert to meters)
-        z = processObservations(observe_msg, ETA, P_REF);
+        [z, ftag_temp] = processObservations(observe_msg, ETA, P_REF);
         
         % direct data associate
         [zf, idf, zn, da_table] = data_associate_known(q, z, ftag_temp, da_table);
@@ -263,9 +294,23 @@ while(1)
         [q, Pcov] = augment(q, Pcov, zn, R);
         
         % save estimated beacon states
-        qbeacons{obs_idx} = q(4:end);
-        
+%         qbeacons{obs_idx} = q(4:end);
+
+        clc
+        ftag_temp
+        z
+        q
+
     end
+    
+        % initial plotting
+    clf                                             % clear the current figure
+%     lmActual = plot(lm(1,:),lm(2,:),'b*'); % plot actual landmark locations, maybe unknown 
+    hold on 
+    wpActual = plot(wp(1,:),wp(2,:), 'gd-');        % plot the waypoints with lines in between to show the path
+    xlim([-2 5]), ylim([-2 5]);                       % Limit the size of the simulation plot
+    xlabel('X [m]'), ylabel('Y [m]');               % Label the axes
+    grid on
     
     % real time plotting
     [Xa,Ya] = plot_DDMR((q(1:3))',axis(gca));                               % Plot the estimated robot position
@@ -273,29 +318,31 @@ while(1)
     [Xd,Yd] = plot_DDMR((qTrue(1:3))',axis(gca));                           % Plot the actual robot position
     qDT(:,i) = q(1:3);                                                      % Save the estimated pose for this time instance
     qTrueDT(:,i) = qTrue;                                                   % Save the actual pose for this time instance
-    Pcov{1,i} = Pcov;
+    PcovDT{1,i} = Pcov;
     noisypose = plot(qTrueDT(1,1:i),qTrueDT(2,1:i),'b-');                   % Plot path of the estimated pose up to this point (the line following the moving triangle)
     truepose = plot(qDT(1,1:i),qDT(2,1:i),'r--','linewidth',2);             % Plot path of the actual pose up to this point (the line following the moving triangle)
-    landmarkEstimate = plot(q(4:2:end), q(5:2:end),'r.','MarkerSize',16);   % Plot the estimated positions of the beacons
+fill(Xa,Ya,'r');                                                        % Fill in the estimated triangle with red
+    fill(Xd,Yd,'b');                                                        % Fill in the actual triangle with blue    
+    landmarkEstimate = plot(q(4:2:end), q(5:2:end),'k.','MarkerSize',16);   % Plot the estimated positions of the beacons
     
     % Print the current iteration value in the plot so it is visible in the video
     iter = sprintf('i = %d', i);
     text(.5, .5, iter);
     
-    fill(Xa,Ya,'r');                                                        % Fill in the estimated triangle with red
-    fill(Xd,Yd,'b');                                                        % Fill in the actual triangle with blue    
+%     fill(Xa,Ya,'r');                                                        % Fill in the estimated triangle with red
+%     fill(Xd,Yd,'b');                                                        % Fill in the actual triangle with blue    
     
-    if dtsum==0
-        if ~isempty(z)                                                                              % If there are measurements
-            plines = make_laser_lines (z,q(1:3));                                                   % Draw lines between the actual robot and the beacons it is currently using, see function below
-            plot(plines(1,:),plines(2,:),'r-');                                                     % Put the lines in the figure and make them solid red           
-            pcov = make_covariance_ellipses(q,P);                                                   % Make the covariance ellipses, see function below
-            [U1,S1,V1] = svd(P(1:3,1:3));                                                           % Singular value decomposition, where P(1:3,1:3)=U1*S1*V1
-            ellipse(30*S1(1,1),30*S1(2,2),atan2(U1(1,2),U1(1,1)),qTrueDT(1,i),qTrueDT(2,i),'c');    % Use the svd results to make the ellipse around the robot?    
-            %ellipse(S1(1,1),S1(2,2),atan2(U1(1,2),U1(1,1)),QDT(1,i),QDT(2,i),'r');               
-            plot(pcov(1,:), pcov(2,:),'r')                                                          % Landmark pose covariance uncertainty ellipse
-        end
-    end
+%     if dtsum==0
+%         if ~isempty(z)                                                                              % If there are measurements
+%             plines = make_laser_lines (z,q(1:3));                                                   % Draw lines between the actual robot and the beacons it is currently using, see function below
+%             plot(plines(1,:),plines(2,:),'r-');                                                     % Put the lines in the figure and make them solid red           
+%             pcov = make_covariance_ellipses(q,Pcov);                                                   % Make the covariance ellipses, see function below
+%             [U1,S1,V1] = svd(Pcov(1:3,1:3));                                                           % Singular value decomposition, where P(1:3,1:3)=U1*S1*V1
+%             ellipse(30*S1(1,1),30*S1(2,2),atan2(U1(1,2),U1(1,1)),qTrueDT(1,i),qTrueDT(2,i),'c');    % Use the svd results to make the ellipse around the robot?    
+%             %ellipse(S1(1,1),S1(2,2),atan2(U1(1,2),U1(1,1)),QDT(1,i),QDT(2,i),'r');               
+%             plot(pcov(1,:), pcov(2,:),'r')                                                          % Landmark pose covariance uncertainty ellipse
+%         end
+%     end
     drawnow                                                                 % Updates the figure immediately
     F = getframe(fig);                                                      % Get the current frame
     writeVideo(vid,F);                                                      % Write the current frame to the video
@@ -785,8 +832,12 @@ for k=1:maxk
 end
 end
 
-function z = processObservations(observe_msg, eta, ref)
+function [z, ftag] = processObservations(observe_msg, eta, ref)
 
+%     ftag = 0;
+%     eta = 2;
+%     ref = -35;
+    
     total_beacons = 0;
 for i = 1:size(observe_msg.Observations,1) % through the rows
        
@@ -796,10 +847,14 @@ for i = 1:size(observe_msg.Observations,1) % through the rows
 end
 
 for i = 1:size(observe_msg.Observations,1)
-    data{i} = NaN*ones(2,1);
+    data{i} = NaN*ones(total_beacons,1);
 end
 
 for i = 1:size(observe_msg.Observations,1) % through the rows
+    
+%     for j=1:total_beacons
+%         data{i}(j) = Inf;
+%     end
     
     % go through beacons in each row
     for j=1:size(observe_msg.Observations(i).Observation,1)
@@ -811,7 +866,9 @@ for i = 1:size(observe_msg.Observations,1) % through the rows
        % cell array, each row is an angle, beacon number is index of rssi
        % data
        data{i}(temp) = observe_msg.Observations(i).Observation(j).Rssi;
-            
+       
+       ftag(j) = temp;
+       
     end
         
 end
@@ -821,6 +878,8 @@ max = Inf;
 idx = 0;
     for i=1:size(data,2)
    
+%         if size(data{i} < total_beacons
+        
         if data{i}(k) < max
         
             max = data{i}(k);
@@ -830,12 +889,35 @@ idx = 0;
         
     end
     
-    z(1,k) = max;
-    z(2,k) = observe_msg.Observations(idx).Angle;
+    if (idx ~= 0)
+        z(1,k) = max;
+        z(2,k) = pi_to_pi(deg2rad(observe_msg.Observations(idx).Angle));
+%         if k == 1
+%             ftag = data{idx};
+%         else    
+%             ftag = [ftag; idx];
+%         end
+    end
     
-    z = rssi2distance(z, eta, ref);
+%     % put ftags in order
+%     ftag = sort(ftag);
     
 end
+
+    z = rssi2distance(z, eta, ref);
+
+    [ftag, idx] = sort(ftag);
+    
+%     z(1,:) = z(1,idx);
+%     z(2,:) = z(2,idx);
+
+    if ~isequal(ftag, idx)
+        z = z(:,ftag)
+    else
+        breakpoint=1;
+    end
+    % put ftags in order
+%     ftag = sort(ftag);
 
 end
 
@@ -851,7 +933,8 @@ end
 
 % cleanup function
 function cleanMeUp()
-rosshutdown;
-disp('Cleanup successful');
+
+    rosshutdown;
+    disp('Cleanup successful');
 
 end
