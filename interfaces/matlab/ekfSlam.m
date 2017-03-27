@@ -62,13 +62,14 @@ cmdVel = rosmessage(cmdVel_pub);
 
 % set pose before continuing
 pose.Pose.Pose.Position.X = 1.5;
-pose.Pose.Pose.Position.Y = 1;
-pose.Pose.Pose.Orientation.W = pi/2;
+pose.Pose.Pose.Position.Y = 0;
+pose.Pose.Pose.Orientation.W = pi_to_pi(pi/2);
 send(setPose_pub, pose);
+pause(10);
 
 %% Algorithm parameters
 % general
-numFeatures = 3;                                    % @TODO: make dynamic (no hardcoded values since number of landmarks is unknown)
+numFeatures = 4;                                    % @TODO: make dynamic (no hardcoded values since number of landmarks is unknown)
 
 % timing
 T = .25;                                            % [sec], time step
@@ -81,13 +82,13 @@ da_table = zeros(1,numFeatures);                    % data association table
 % navigation
 wp_idx = 1;                                         % waypoint index
 wpIsFinal = false;                                  % set if at final waypoint 
-wp = [1.5;                                          % [m], x-coordinates of waypoints
-      2];                                         % [m], y-coordinates of waypoints
+wp = [.6, .6, 2.4, 2.4;                                          % [m], x-coordinates of waypoints
+      .6, 2.4, 2.4, .6];                                         % [m], y-coordinates of waypoints
 
 % control
-V = 0;                                              % [m/s], constant linear velocity, @TODO: convert to fuzzy logic
-G = 0;                                              % [rad], initial steering angle
-G_MAX = deg2rad(180);                               % [rad], max steering angle
+% V = 0;                                              % [m/s], constant linear velocity, @TODO: convert to fuzzy logic
+% G = 0;                                              % [rad], initial steering angle
+% G_MAX = deg2rad(180);                               % [rad], max steering angle
 
 % pioneer
 V_MAX = 1.2;                                        % [m/s], max linear velocity
@@ -98,7 +99,7 @@ TRACK = .381;                                       % [m], distance between whee
 ENCODER_TICKS = 500;                                % number of encoder ticks
 
 % observation
-DT_OBSERVE = 50*T;                                 % [sec], time between observations
+DT_OBSERVE = 30*T;                                 % [sec], time between observations
 obs_idx = 0;                                        % index for counting obervations
 
 % rssi to distance
@@ -108,7 +109,7 @@ P_REF = -29;                                        % [dBm], reference power lev
 %% Algorithm setup
 pose = receive(pose_sub);                           % robot's initial pose, measured by robot
 q = [pose.Pose.Pose.Position.X; pose.Pose.Pose.Position.Y; pi_to_pi(pose.Pose.Pose.Orientation.W)];
-qTrue = [1.5; 1; pi_to_pi(pi/2)];                        % [m, m, rad], estimate of initial pose
+qTrue = [1.5; 0; pi_to_pi(pi/2)];                        % [m, m, rad], estimate of initial pose
 
 Pcov = diag((qTrue-q(1:3)).^2);                     % initial state covariance matrix
 
@@ -135,6 +136,10 @@ qTrueDT(:,i) = qTrue;
 qDT(:,i) = q(1:3);
 PcovDT{1,i} = Pcov;
 
+%% FLC parameters
+K_g = .8;
+a = readfis('robot_new');
+
 %% recording setup
 fig = figure;
 MINUTES = 1;                                        % Length of video in minutes
@@ -144,7 +149,14 @@ vid.Quality = 100;                                  % all the quality
 vid.FrameRate = i_max/VIDEO_LENGTH;                  % Frames per second needed for desired video length and max iterations
 open(vid);                                          % Open the video for writing
 
-tic
+% pose = receive(pose_sub);
+% q(1) = pose.Pose.Pose.Position.X;
+% q(2) = pose.Pose.Pose.Position.Y;
+% q(3) = pose.Pose.Pose.Orientation.W;
+% 
+% qDT(:,i) = q(1:3);
+
+% tic
 
 %% Algorithm running
 while(1)
@@ -158,53 +170,72 @@ while(1)
 %     xlabel('X [m]'), ylabel('Y [m]');               % Label the axes
 %     grid on
     
-    i = i + 1;
-   
+%     i = i + 1;
+    
+    rNew = [q(1);q(2)];
+    xD = wp(1,wp_idx);
+    yD = wp(2,wp_idx);
+    d_init = norm([xD;yD] - rNew);
+    dNew = double(d_init);
+    
+    if(abs(dNew)>AT_WAYPOINT)
+        V=.2*evalfis(dNew,a);
+        V=sign(V).*min(1.2,abs(V));
+        delx = xD-rNew(1,1);
+        dely=yD-rNew(2,1);
+        thetad=atan2(dely,delx);
+        G = K_g*pi_to_pi(thetad-q(3));
+        G=sign(G).*min((80*pi/180)*ones(size(G)),abs(G));
+        W=V*sin(G)/TRACK;
+    else
+        V = 0;
+        W = 0;
+        wp_idx = wp_idx+1;
+        if wp_idx > size(wp,2)
+            wpIsFinal = 1;
+        end 
+    end   
+    
     % compute steering angle
-    cwp = wp(:,wp_idx);
-    dist = sqrt((cwp(1) - qTrue(1))^2 + (cwp(2)-qTrue(2))^2);
-    if (dist^2 < AT_WAYPOINT^2)
-        wp_idx = wp_idx + 1;
-        if (wp_idx > size(wp,2))
-            wpIsFinal = true;
-        else
-            cwp = wp(:,wp_idx);
-        end
-    end
-   
-    % change in steering angle
-    deltaG = pi_to_pi(atan2(cwp(2) - qTrue(2), cwp(1)-qTrue(1))-qTrue(3)-G);
-
-    % limit steering rate
-%     maxDelta = RATE_G*T;
-%     if abs(deltaG) > maxDelta
-%         deltaG = sign(deltaG)*maxDelta;
+%     cwp = wp(:,wp_idx);
+%     dist = sqrt((cwp(1) - qTrue(1))^2 + (cwp(2)-qTrue(2))^2);
+%     if (dist^2 < AT_WAYPOINT^2)
+%         wp_idx = wp_idx + 1;
+%         if (wp_idx > size(wp,2))
+%             wpIsFinal = true;
+%         else
+%             cwp = wp(:,wp_idx);
+%         end
 %     end
+%    
+%     % change in steering angle
+%     deltaG = pi_to_pi(atan2(cwp(2) - qTrue(2), cwp(1)-qTrue(1))-qTrue(3)-G);
+% 
+%     % limit steering rate
+% %     maxDelta = RATE_G*T;
+% %     if abs(deltaG) > maxDelta
+% %         deltaG = sign(deltaG)*maxDelta;
+% %     end
+% 
+%     % limit steering angle
+%     G = G + deltaG;
+%     if abs(G) > G_MAX
+%         G = sign(G)*G_MAX;
+%     end
+%     
+%     % convert to our model
+%     W = V*sin(G)/TRACK;
+    
 
-    % limit steering angle
-    G = G + deltaG;
-    if abs(G) > G_MAX
-        G = sign(G)*G_MAX;
-    end
-    
-    % convert to our model
-    W = V*sin(G)/TRACK;
-    
-    % this will cause the pioneer to just keep driving 
-    if wpIsFinal == true
-        wp_idx = 1;
-        wpIsFinal = false;
-        break;
-    end
     
     % limit velocities
-    if abs(V) > V_MAX
-         V = sign(V)*V_MAX;
-     end
-     
-     if abs(W) > W_MAX
-         W = sign(W)*W_MAX;
-     end
+%     if abs(V) > V_MAX
+%          V = sign(V)*V_MAX;
+%      end
+%      
+%      if abs(W) > W_MAX
+%          W = sign(W)*W_MAX;
+%      end
     
     % estimate noisy velocities using process noise covariance matrix
     if (V ~= 0)
@@ -220,27 +251,42 @@ while(1)
     end
        
 %     if i > 1
-    if toc < T
-        pause(T-toc);
-    end
+%     if toc < T
+%         pause(T-toc);
+%     end
 %     end
     % send the command to the pioneer
     cmdVel.Linear.X = V;
     cmdVel.Angular.Z = W;
     send(cmdVel_pub, cmdVel);
 %     pause(T);
-    tic
+%     tic
 
+    pause(T);
+
+%     cmdVel.Linear.X = 0;
+%     cmdVel.Angular.Z = 0;
+%     send(cmdVel_pub, cmdVel);
+    
     % get the pose after moving for T seconds
     oldPose = q(1:3);
     pose = receive(pose_sub);
     q(1:3) = [pose.Pose.Pose.Position.X; pose.Pose.Pose.Position.Y; pi_to_pi(pose.Pose.Pose.Orientation.W)];
     
     % estimate pose
-    if V ~= 0
-        qTrue(1:2) = qTrue(1:2) + Vn*T*((q(1:2) - oldPose(1:2))/norm(q(1:2) - oldPose(1:2)));
+    if ~isequal(q(1:2),oldPose(1:2))
+        qTrue(1:2) = qTrue(1:2) + 1.6*Vn*T*((q(1:2) - oldPose(1:2))/norm(q(1:2) - oldPose(1:2)));
+        qTrue(3) = atan2(q(2)-oldPose(2),q(1)-oldPose(1));
+%     else
+%         qTrue = qTrue;
     end
-        
+
+        % this will cause the pioneer to just keep driving 
+    if wpIsFinal == true
+        wp_idx = 1;
+        wpIsFinal = false;
+%         break;
+    end
         
     % predict step
     s = sin(G + q(3));
@@ -269,7 +315,7 @@ while(1)
     if dtsum >= DT_OBSERVE
         dtsum = 0;
         
-        pause(T-toc);
+%         pause(T-toc);
         
         % stop pioneer for observations
         cmdVel.Linear.X = 0;
@@ -347,10 +393,14 @@ fill(Xa,Ya,'r');                                                        % Fill i
     F = getframe(fig);                                                      % Get the current frame
     writeVideo(vid,F);                                                      % Write the current frame to the video
 
+%     i = i + 1;
+    
     % stop after some iterations
     if (i >= i_max)  % time = DT_CONTROLS*2e3
         break;        
     end
+    
+    i = i + 1;
     
     % a debugging breakpoint
     if i == 1e3
@@ -358,6 +408,11 @@ fill(Xa,Ya,'r');                                                        % Fill i
     end
     
 end
+
+% stop pioneer for observations
+        cmdVel.Linear.X = 0;
+        cmdVel.Angular.Z = 0;
+        send(cmdVel_pub, cmdVel);
 
 %% save all data
 close(vid)
@@ -367,26 +422,26 @@ save('OUT/allData.mat');
 % plot of x, y, and theta (3 subplots)
 figure(2);
 subplot(3,1,1); % x-position subplot
-trueq = plot((1:i)*T,qDT(1,:), 'b-');
+trueq = plot((1:size(qDT,2))*T,qDT(1,:), 'b-');
 hold on
-noisyq = plot((1:i)*T,qTrueDT(1,:),'r--', 'linewidth',2);
+noisyq = plot((1:size(qTrueDT,2))*T,qTrueDT(1,:),'r--', 'linewidth',2);
 title('Robot pose');
 xlabel('Iteration');
 ylabel('x-position [m]');
 grid on
 
 subplot(3,1,2); % y-position subplot
-plot((1:i)*T,qDT(2,:),'b-');
+plot((1:size(qDT,2))*T,qDT(2,:),'b-');
 hold on
-plot((1:i)*T,qTrueDT(2,:),'r--', 'linewidth', 2);
+plot((1:size(qTrueDT,2))*T,qTrueDT(2,:),'r--', 'linewidth', 2);
 xlabel('Time [sec]');
 ylabel('y-position [m]');
 grid on
 
 subplot(3,1,3); % orientation subplot
-plot((1:i)*T,qDT(3,:),'b-');
+plot((1:size(qDT,2))*T,qDT(3,:),'b-');
 hold on
-plot((1:i)*T,qTrueDT(3,:),'r--', 'linewidth', 2);
+plot((1:size(qTrueDT,2))*T,qTrueDT(3,:),'r--', 'linewidth', 2);
 xlabel('Time [sec]');
 ylabel('Orientation [rad]');
 grid on
