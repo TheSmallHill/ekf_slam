@@ -60,12 +60,12 @@ observe_req = rosmessage(observeRequest_pub);
 pose = rosmessage(pose_sub);
 cmdVel = rosmessage(cmdVel_pub);
 
-% set pose before continuing
-pose.Pose.Pose.Position.X = 1.5;
-pose.Pose.Pose.Position.Y = 0;
-pose.Pose.Pose.Orientation.W = pi_to_pi(pi/2);
-send(setPose_pub, pose);
-pause(10);
+% % set pose before continuing
+% pose.Pose.Pose.Position.X = 2;
+% pose.Pose.Pose.Position.Y = 3;
+% pose.Pose.Pose.Orientation.W = pi_to_pi(-pi/2);
+% send(setPose_pub, pose);
+% pause(10);
 
 %% Algorithm parameters
 % general
@@ -82,34 +82,47 @@ da_table = zeros(1,numFeatures);                    % data association table
 % navigation
 wp_idx = 1;                                         % waypoint index
 wpIsFinal = false;                                  % set if at final waypoint 
-wp = [.6, .6, 2.4, 2.4;                                          % [m], x-coordinates of waypoints
-      .6, 2.4, 2.4, .6];                                         % [m], y-coordinates of waypoints
+wp = [2.4, .92, 1.8, .6, 2;                                          % [m], x-coordinates of waypoints
+      2.4, 2.13, 1.2, .6, .6];                                         % [m], y-coordinates of waypoints
 
+% matrix of landmarks, ONLY FOR REFERENCE  
+lm = [3, 1.5, 1.5, 3;
+      3, 0, 2.7, 1];
+  
 % control
 % V = 0;                                              % [m/s], constant linear velocity, @TODO: convert to fuzzy logic
 % G = 0;                                              % [rad], initial steering angle
 % G_MAX = deg2rad(180);                               % [rad], max steering angle
 
 % pioneer
-V_MAX = 1.2;                                        % [m/s], max linear velocity
-W_MAX = deg2rad(300);                               % [rad/s], max angular velocity
+% V_MAX = 1.2;                                        % [m/s], max linear velocity
+% W_MAX = deg2rad(300);                               % [rad/s], max angular velocity
 WHEEL_DIAMETER = .185;                              % [m], wheel diameter
 WHEEL_RADIUS = WHEEL_DIAMETER/2;                    % [m], wheel radius
 TRACK = .381;                                       % [m], distance between wheels
 ENCODER_TICKS = 500;                                % number of encoder ticks
 
 % observation
-DT_OBSERVE = 30*T;                                 % [sec], time between observations
-obs_idx = 0;                                        % index for counting obervations
+DT_OBSERVE = 30*T;                                  % [sec], time between observations
+obs_idx = 1;                                        % index for counting obervations
 
 % rssi to distance
 ETA = 2;                                            % propogation constant
 P_REF = -29;                                        % [dBm], reference power level
 
 %% Algorithm setup
-pose = receive(pose_sub);                           % robot's initial pose, measured by robot
-q = [pose.Pose.Pose.Position.X; pose.Pose.Pose.Position.Y; pi_to_pi(pose.Pose.Pose.Orientation.W)];
-qTrue = [1.5; 0; pi_to_pi(pi/2)];                        % [m, m, rad], estimate of initial pose
+% pose = receive(pose_sub);                           % robot's initial pose, measured by robot
+% q = [pose.Pose.Pose.Position.X; pose.Pose.Pose.Position.Y; pi_to_pi(pose.Pose.Pose.Orientation.W)];
+
+q(1:3) = [1.8;2.9;.98*pi_to_pi(-pi_2)];               % initial estimate
+qTrue = [2; 3; pi_to_pi(-pi/2)];                      % [m, m, rad], where the robot actually is
+
+% set pose before continuing
+pose.Pose.Pose.Position.X = qTrue(1);
+pose.Pose.Pose.Position.Y = qTrue(2);
+pose.Pose.Pose.Orientation.W = qTrue(3);
+send(setPose_pub, pose);
+pause(10);
 
 Pcov = diag((qTrue-q(1:3)).^2);                     % initial state covariance matrix
 
@@ -137,8 +150,9 @@ qDT(:,i) = q(1:3);
 PcovDT{1,i} = Pcov;
 
 %% FLC parameters
-K_g = .8;
+K_g = 1.4;
 a = readfis('robot_new');
+kappa = 1.6; % constant multiplier for qTrue
 
 %% recording setup
 fig = figure;
@@ -149,28 +163,10 @@ vid.Quality = 100;                                  % all the quality
 vid.FrameRate = i_max/VIDEO_LENGTH;                  % Frames per second needed for desired video length and max iterations
 open(vid);                                          % Open the video for writing
 
-% pose = receive(pose_sub);
-% q(1) = pose.Pose.Pose.Position.X;
-% q(2) = pose.Pose.Pose.Position.Y;
-% q(3) = pose.Pose.Pose.Orientation.W;
-% 
-% qDT(:,i) = q(1:3);
-
-% tic
-
 %% Algorithm running
 while(1)
     
-%     % initial plotting
-%     clf                                             % clear the current figure
-% %     lmActual = plot(lm(1,:),lm(2,:),'b*'); % plot actual landmark locations, maybe unknown 
-%     hold on 
-%     wpActual = plot(wp(1,:),wp(2,:), 'gd-');        % plot the waypoints with lines in between to show the path
-%     xlim([-2 5]), ylim([-2 5]);                       % Limit the size of the simulation plot
-%     xlabel('X [m]'), ylabel('Y [m]');               % Label the axes
-%     grid on
-    
-%     i = i + 1;
+    robot_error(i) = sqrt((q(1)-qTrue(1))^2 + (q(2)-qTrue(2))^2);
     
     rNew = [q(1);q(2)];
     xD = wp(1,wp_idx);
@@ -179,14 +175,14 @@ while(1)
     dNew = double(d_init);
     
     if(abs(dNew)>AT_WAYPOINT)
-        V=.2*evalfis(dNew,a);
-        V=sign(V).*min(1.2,abs(V));
+        V =.2*evalfis(dNew,a);
+        V = sign(V).*min(1.2,abs(V));
         delx = xD-rNew(1,1);
-        dely=yD-rNew(2,1);
-        thetad=atan2(dely,delx);
+        dely = yD-rNew(2,1);
+        thetad = atan2(dely,delx);
         G = K_g*pi_to_pi(thetad-q(3));
-        G=sign(G).*min((80*pi/180)*ones(size(G)),abs(G));
-        W=V*sin(G)/TRACK;
+        G = sign(G).*min((80*pi/180)*ones(size(G)),abs(G));
+        W = V*sin(G)/TRACK;
     else
         V = 0;
         W = 0;
@@ -195,47 +191,6 @@ while(1)
             wpIsFinal = 1;
         end 
     end   
-    
-    % compute steering angle
-%     cwp = wp(:,wp_idx);
-%     dist = sqrt((cwp(1) - qTrue(1))^2 + (cwp(2)-qTrue(2))^2);
-%     if (dist^2 < AT_WAYPOINT^2)
-%         wp_idx = wp_idx + 1;
-%         if (wp_idx > size(wp,2))
-%             wpIsFinal = true;
-%         else
-%             cwp = wp(:,wp_idx);
-%         end
-%     end
-%    
-%     % change in steering angle
-%     deltaG = pi_to_pi(atan2(cwp(2) - qTrue(2), cwp(1)-qTrue(1))-qTrue(3)-G);
-% 
-%     % limit steering rate
-% %     maxDelta = RATE_G*T;
-% %     if abs(deltaG) > maxDelta
-% %         deltaG = sign(deltaG)*maxDelta;
-% %     end
-% 
-%     % limit steering angle
-%     G = G + deltaG;
-%     if abs(G) > G_MAX
-%         G = sign(G)*G_MAX;
-%     end
-%     
-%     % convert to our model
-%     W = V*sin(G)/TRACK;
-    
-
-    
-    % limit velocities
-%     if abs(V) > V_MAX
-%          V = sign(V)*V_MAX;
-%      end
-%      
-%      if abs(W) > W_MAX
-%          W = sign(W)*W_MAX;
-%      end
     
     % estimate noisy velocities using process noise covariance matrix
     if (V ~= 0)
@@ -269,23 +224,14 @@ while(1)
 %     send(cmdVel_pub, cmdVel);
     
     % get the pose after moving for T seconds
-    oldPose = q(1:3);
+    oldPose = qTrue;
     pose = receive(pose_sub);
-    q(1:3) = [pose.Pose.Pose.Position.X; pose.Pose.Pose.Position.Y; pi_to_pi(pose.Pose.Pose.Orientation.W)];
-    
-    % estimate pose
-    if ~isequal(q(1:2),oldPose(1:2))
-        qTrue(1:2) = qTrue(1:2) + 1.6*Vn*T*((q(1:2) - oldPose(1:2))/norm(q(1:2) - oldPose(1:2)));
-        qTrue(3) = atan2(q(2)-oldPose(2),q(1)-oldPose(1));
-%     else
-%         qTrue = qTrue;
-    end
+    qTrue(1:3) = [pose.Pose.Pose.Position.X; pose.Pose.Pose.Position.Y; pi_to_pi(pose.Pose.Pose.Orientation.W)];
 
-        % this will cause the pioneer to just keep driving 
+    % this will cause the pioneer to just keep driving 
     if wpIsFinal == true
         wp_idx = 1;
         wpIsFinal = false;
-%         break;
     end
         
     % predict step
@@ -310,13 +256,21 @@ while(1)
         Pcov(4:end,1:3) = Pcov(1:3,4:end)';
     end  
     
+%     if ~isequal(qTrue(1:2),oldPose(1:2))
+%         q(1:2) = q(1:2) + kappa*Vn*T*((qTrue(1:2) - oldPose(1:2))/norm(qTrue(1:2) - oldPose(1:2)));
+%         q(3) = atan2(qTrue(2)-oldPose(2),qTrue(1)-oldPose(1));
+%     end
+    
+    q(1:3) = [q(1) + Vn*T*cos(G + q(3));
+              q(2) + Vn*T*sin(G + q(3));
+              pi_to_pi(q(3) + Vn*T*sin(G)/TRACK)];
+
     % observate steps every DT_OBSERVE
     dtsum = dtsum + T;
     if dtsum >= DT_OBSERVE
+        
         dtsum = 0;
-        
-%         pause(T-toc);
-        
+               
         % stop pioneer for observations
         cmdVel.Linear.X = 0;
         cmdVel.Angular.Z = 0;
@@ -340,20 +294,24 @@ while(1)
         [q, Pcov] = augment(q, Pcov, zn, R);
         
         % save estimated beacon states
-%         qbeacons{obs_idx} = q(4:end);
-
+        if size(q,1) > 3
+            qbeacons{obs_idx} = q(4:end);
+        end
+        
         clc
         ftag_temp
         z
         q
 
+        obs_idx = obs_idx + 1
+        
     end
     
         % initial plotting
     clf                                             % clear the current figure
 %     lmActual = plot(lm(1,:),lm(2,:),'b*'); % plot actual landmark locations, maybe unknown 
     hold on 
-    wpActual = plot(wp(1,:),wp(2,:), 'gd-');        % plot the waypoints with lines in between to show the path
+    wpActual = plot(wp(1,:),wp(2,:), 'gd');        % plot the waypoints with lines in between to show the path
     xlim([-2 5]), ylim([-2 5]);                       % Limit the size of the simulation plot
     xlabel('X [m]'), ylabel('Y [m]');               % Label the axes
     grid on
@@ -369,7 +327,9 @@ while(1)
     truepose = plot(qDT(1,1:i),qDT(2,1:i),'r--','linewidth',2);             % Plot path of the actual pose up to this point (the line following the moving triangle)
 fill(Xa,Ya,'r');                                                        % Fill in the estimated triangle with red
     fill(Xd,Yd,'b');                                                        % Fill in the actual triangle with blue    
-    landmarkEstimate = plot(q(4:2:end), q(5:2:end),'k.','MarkerSize',16);   % Plot the estimated positions of the beacons
+    landmarkActual = plot(lm(1,:), lm(2,:),'b*','MarkerSize',16);
+    landmarkEstimate = plot(q(4:2:end), q(5:2:end),'r.','MarkerSize',16);   % Plot the estimated positions of the beacons
+    
     
     % Print the current iteration value in the plot so it is visible in the video
     iter = sprintf('i = %d', i);
@@ -407,12 +367,17 @@ fill(Xa,Ya,'r');                                                        % Fill i
         breakpoint = true;
     end
     
+    % save more of the data
+    VDT(i,:) = [V, Vn];
+    WDT(i,:) = [W, Wn];
+    d_initDT(i) = d_init;
+    
 end
 
 % stop pioneer for observations
-        cmdVel.Linear.X = 0;
-        cmdVel.Angular.Z = 0;
-        send(cmdVel_pub, cmdVel);
+cmdVel.Linear.X = 0;
+cmdVel.Angular.Z = 0;
+send(cmdVel_pub, cmdVel);
 
 %% save all data
 close(vid)
@@ -450,40 +415,41 @@ grid on
 saveas(gcf, 'OUT/positionComparison','fig');
 print('-depsc2','-r300','OUT/positionComparison.eps');
 
-%% robot and beacon error figures
-% for ii = 1:size(qbeacons,2)
-%     qbeacons_temp(:,ii) = NaN*zeros(2*num_beacons,1);
-%     qbeacons_temp(1:size(qbeacons{ii},1),ii) = qbeacons{ii};
+for ii = 1:size(qbeacons,2)
+    qbeacons_temp(:,ii) = NaN*zeros(2*numFeatures,1);
+    qbeacons_temp(1:size(qbeacons{ii},1),ii) = qbeacons{ii};
 %     
 % % x values
 %     for i = 1:size(qbeacons{ii},1)/2
 %         qbeacons_temp{ii}(da_table(i),1) = qbeacons{ii}(i*2-1);
 %         qbeacons_temp{ii}(da_table(i),2) = qbeacons{ii}(i*2);
 %     end
+    
 % y values
 %     for i = 2:2:num_beacons
 %         qbeacons_temp{ii}(da_table(i),2) = qbeacons{ii}(i);    
 %     endd
 %     qbeacons_temp{ii}(:,1) = qbeacons{1:2:end};
 %     qbeacons_temp{ii}(:,2) = qbeacons{2:2:end};
-% end
 
-% for ii = 1:size(qbeacons_temp,2)
+end
+% 
+for ii = 1:size(qbeacons_temp,2)
 %     for jj = da_table(end,:)
 %        beac_error(jj,ii) = sqrt((qbeacons_temp{ii}(jj, 1) - lm(1, jj))^2 + (qbeacons_temp{ii}(jj, 2) - lm(2, jj))^2);
 %     end
-%    beac_error(1,ii) =  sqrt((qbeacons_temp(1,ii) - lm(1,4))^2 + (qbeacons_temp(2,ii) - lm(2,4))^2);
-%    beac_error(2,ii) =  sqrt((qbeacons_temp(3,ii) - lm(1,5))^2 + (qbeacons_temp(4,ii) - lm(2,5))^2);
-%    beac_error(3,ii) =  sqrt((qbeacons_temp(5,ii) - lm(1,6))^2 + (qbeacons_temp(6,ii) - lm(2,6))^2);
-%    beac_error(4,ii) =  sqrt((qbeacons_temp(7,ii) - lm(1,7))^2 + (qbeacons_temp(8,ii) - lm(2,7))^2);
+   beac_error(1,ii) =  sqrt((qbeacons_temp(1,ii) - lm(1,1))^2 + (qbeacons_temp(2,ii) - lm(2,1))^2);
+   beac_error(2,ii) =  sqrt((qbeacons_temp(3,ii) - lm(1,2))^2 + (qbeacons_temp(4,ii) - lm(2,2))^2);
+   beac_error(3,ii) =  sqrt((qbeacons_temp(5,ii) - lm(1,3))^2 + (qbeacons_temp(6,ii) - lm(2,3))^2);
+   beac_error(4,ii) =  sqrt((qbeacons_temp(7,ii) - lm(1,4))^2 + (qbeacons_temp(8,ii) - lm(2,4))^2);
 %    beac_error(5,ii) =  sqrt((qbeacons_temp(9,ii) - lm(1,8))^2 + (qbeacons_temp(10,ii) - lm(2,8))^2);
 %    beac_error(6,ii) =  sqrt((qbeacons_temp(11,ii) - lm(1,9))^2 + (qbeacons_temp(12,ii) - lm(2,9))^2);
 %    beac_error(7,ii) =  sqrt((qbeacons_temp(13,ii) - lm(1,3))^2 + (qbeacons_temp(14,ii) - lm(2,3))^2);
 %    beac_error(8,ii) =  sqrt((qbeacons_temp(15,ii) - lm(1,1))^2 + (qbeacons_temp(16,ii) - lm(2,1))^2);
 %    beac_error(9,ii) =  sqrt((qbeacons_temp(17,ii) - lm(1,2))^2 + (qbeacons_temp(18,ii) - lm(2,2))^2);
-% end
+end
 
-% beac_error(isnan(beac_error))=0;
+beac_error(isnan(beac_error))=0;
 
 % for i=1:size(beac_error,1)
 %    for j=1:size(beac_error,2)
@@ -493,36 +459,37 @@ print('-depsc2','-r300','OUT/positionComparison.eps');
 %    end
 % end
 
-% eb = sum(beac_error,1);
-% RMSE_beac = sqrt((1/size(eb,2))*sum(eb.^2));
+eb = sum(beac_error,1);
+RMSE_beac = sqrt((1/size(eb,2))*sum(eb.^2));
 
-% figure
-% plot((1:obs_idx)*DT_OBSERVE*T, eb);
-% title('Total Beacon Position error');
-% xlabel('Time [sec]');
-% ylabel('e_B(t) [m]');
-% grid on
+figure
+plot((1:obs_idx)*T+(1:obs_idx)*DT_OBSERVE, eb);
+title('Total Beacon Position error');
+xlabel('Time [sec]');
+ylabel('e_B(t) [m]');
+grid on
 
-% savefilename = 'OUT/beaconerror';
-% saveas(gcf, savefilename, 'fig');
-% print('-depsc2','-r300',[savefilename, '.eps']);
+savefilename = 'OUT/beaconError';
+saveas(gcf, savefilename, 'fig');
+print('-depsc2','-r300',[savefilename, '.eps']);
 
-% figure
-% plot((1:i-1)*T, robot_error);
-% title('Robot Error');
-% xlabel('Time [sec]');
-% ylabel('e_P(t) [m]');
-% grid on
+figure
+plot((1:size(robot_error))*T, robot_error);
+title('Robot Error');
+xlabel('Time [sec]');
+ylabel('e_P(t) [m]');
+grid on
 
-% savefilename = 'OUT/roboterror';
-% saveas(gcf, savefilename, 'fig');
-% print('-depsc2','-r300',[savefilename, '.eps']);
+savefilename = 'OUT/robotError';
+saveas(gcf, savefilename, 'fig');
+print('-depsc2','-r300',[savefilename, '.eps']);
 
 % for ii = 1:obs_idx
+   
 %     b4_err(ii,1) = sqrt((qbeacons{ii}(:,1)-lm(1,4))^2+(qbeacons{ii}(:,2)-lm(2,4))^2);
+    
 % end
 
-%% Save everything again (including plots)
 save('OUT/allData.mat');
 
 end
